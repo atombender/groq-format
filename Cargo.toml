@@ -1,0 +1,18 @@
+[package]
+name = "groqfmt"
+version = "0.1.0"
+edition = "2024"
+description = "Format GROQ queries with adaptive line wrapping"
+
+[lib]
+name = "groqfmt"
+path = "src/lib.rs"
+
+[[bin]]
+name = "groqfmt"
+path = "src/main.rs"
+
+[dependencies]
+groq-parser = { git = "https://github.com/sanity-io/groq-parser-rs" }
+clap = { version = "4", features = ["derive"] }
+tempfile = "3"
