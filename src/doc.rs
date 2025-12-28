@@ -161,7 +161,7 @@ pub fn pretty(width: usize, doc: Doc) -> String {
                     doc: (*doc).clone(),
                 };
 
-                let mut test_items: Vec<Item> = items.iter().cloned().collect();
+                let mut test_items: Vec<Item> = items.to_vec();
                 test_items.push(flat_item);
 
                 if fits(width.saturating_sub(col), test_items) {

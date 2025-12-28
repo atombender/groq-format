@@ -123,11 +123,10 @@ fn format_dot(dot: &DotOperator) -> Doc {
     let rhs = format_expr(&dot.rhs);
 
     // After dereference (->), don't add extra dot
-    if let Expr::Postfix(post) = dot.lhs.as_ref() {
-        if post.operator == Token::Arrow {
+    if let Expr::Postfix(post) = dot.lhs.as_ref()
+        && post.operator == Token::Arrow {
             return Doc::concat([lhs, rhs]);
         }
-    }
 
     Doc::concat([lhs, Doc::text("."), rhs])
 }
