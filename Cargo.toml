@@ -1,0 +1,20 @@
+[package]
+name = "groq-format"
+version = "0.1.0"
+edition = "2024"
+description = "A formatter for the GROQ query language"
+license = "MIT"
+repository = "https://github.com/sanity-io/groq-format"
+
+[lib]
+name = "groq_format"
+path = "src/lib.rs"
+
+[[bin]]
+name = "groq-format"
+path = "src/main.rs"
+
+[dependencies]
+groq-parser = { git = "https://github.com/sanity-io/groq-parser-rs" }
+clap = { version = "4", features = ["derive"] }
+tempfile = "3"
