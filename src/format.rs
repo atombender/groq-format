@@ -19,9 +19,9 @@ pub fn format_expr(expr: &Expr) -> Doc {
                 lhs,
                 Doc::group(Doc::concat([
                     Doc::text("["),
-                    Doc::nest(2, constraint),
-                    Doc::text("]"),
+                    constraint,
                 ])),
+                Doc::text("]"),
             ])
         }
         Expr::Slice(slice) => {
@@ -211,7 +211,6 @@ fn format_array(arr: &Array) -> Doc {
             2,
             Doc::concat([Doc::line_or_empty(), content]),
         )),
-        Doc::line_or_empty(),
         Doc::text("]"),
     ])
 }

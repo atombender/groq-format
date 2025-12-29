@@ -154,17 +154,8 @@ pub fn pretty(width: usize, doc: Doc) -> String {
                 });
             }
             Doc::Group(doc) => {
-                // Try flat mode first
-                let flat_item = Item {
-                    indent: item.indent,
-                    mode: Mode::Flat,
-                    doc: (*doc).clone(),
-                };
-
-                let mut test_items: Vec<Item> = items.to_vec();
-                test_items.push(flat_item);
-
-                if fits(width.saturating_sub(col), test_items) {
+                // Try flat mode first - check if it fits without cloning
+                if fits_doc(width.saturating_sub(col), &doc, Mode::Flat) {
                     items.push(Item {
                         indent: item.indent,
                         mode: Mode::Flat,
@@ -185,54 +176,48 @@ pub fn pretty(width: usize, doc: Doc) -> String {
     output
 }
 
-fn fits(mut w: usize, mut items: Vec<Item>) -> bool {
-    while let Some(item) = items.pop() {
-        match item.doc {
+
+
+/// Check if a document fits in the given width without cloning.
+/// This implements a stack-based fitting algorithm similar to Wadler's but without document cloning.
+fn fits_doc(width: usize, doc: &Doc, mode: Mode) -> bool {
+    let mut stack = vec![(doc, mode)];
+    let mut remaining_width = width;
+
+    while let Some((current_doc, current_mode)) = stack.pop() {
+        match current_doc {
             Doc::Nil => {}
             Doc::Text(s) => {
-                if s.len() > w {
+                if s.len() > remaining_width {
                     return false;
                 }
-                w -= s.len();
+                remaining_width -= s.len();
             }
             Doc::Line { space } => {
-                if item.mode == Mode::Flat {
-                    if space.len() > w {
+                if current_mode == Mode::Flat {
+                    if space.len() > remaining_width {
                         return false;
                     }
-                    w -= space.len();
-                } else {
-                    return true; // Line break always fits
+                    remaining_width -= space.len();
                 }
+                // In break mode, line breaks always fit
             }
-            Doc::Nest { indent, doc } => {
-                items.push(Item {
-                    indent: item.indent + indent,
-                    mode: item.mode,
-                    doc: *doc,
-                });
+            Doc::Nest { doc, .. } => {
+                // Nesting doesn't affect width calculation, just push the nested doc
+                stack.push((doc, current_mode));
             }
             Doc::Concat { left, right } => {
-                items.push(Item {
-                    indent: item.indent,
-                    mode: item.mode,
-                    doc: *right,
-                });
-                items.push(Item {
-                    indent: item.indent,
-                    mode: item.mode,
-                    doc: *left,
-                });
+                // Push right first (stack is LIFO), then left
+                stack.push((right, current_mode));
+                stack.push((left, current_mode));
             }
             Doc::Group(doc) => {
-                items.push(Item {
-                    indent: item.indent,
-                    mode: item.mode,
-                    doc: *doc,
-                });
+                // For groups, we try flat mode (most restrictive)
+                stack.push((doc, Mode::Flat));
             }
         }
     }
+
     true
 }
 
