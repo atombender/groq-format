@@ -1,2 +1,2 @@
 #!/bin/bash
-exec cargo run -q --bin groqfmt -- "$@"
+exec cargo run -q --bin groq-format -- "$@"
