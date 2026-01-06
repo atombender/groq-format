@@ -176,8 +176,6 @@ pub fn pretty(width: usize, doc: Doc) -> String {
     output
 }
 
-
-
 /// Check if a document fits in the given width without cloning.
 /// This implements a stack-based fitting algorithm similar to Wadler's but without document cloning.
 fn fits_doc(width: usize, doc: &Doc, mode: Mode) -> bool {

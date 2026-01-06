@@ -42,11 +42,6 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
     let cli = Cli::parse();
 
     if cli.inputs.is_empty() {
-        if cli.write {
-            eprintln!("Cannot use -w/--write with stdin");
-            std::process::exit(1);
-        }
-
         let mut input = String::new();
         io::stdin().read_to_string(&mut input)?;
 

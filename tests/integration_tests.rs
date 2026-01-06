@@ -1,10 +1,6 @@
 use groq_format::{format_query, FormatError};
 
-#[cfg(test)]
-mod integration_tests {
-    use super::*;
-
-    #[test]
+#[test]
     fn test_blog_post_query() {
         let input = r#"*[_type=="post"&&published==true]{_id,title,slug,author->{name,image{asset->{url}}},publishedAt,excerpt,categories[]->{title,slug}}"#;
         let expected = r#"*[_type == "post" && published == true] {
@@ -215,4 +211,3 @@ mod integration_tests {
         let result = format_query(input, 30).unwrap();
         assert_eq!(result, expected);
     }
-}
