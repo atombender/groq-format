@@ -10,6 +10,21 @@ Uses Wadler's "A prettier printer" algorithm to intelligently wrap long lines wh
 cargo install --git https://github.com/sanity-io/groq-format
 ```
 
+## Use with Zed
+
+This extension can be used with [Zed](https://zed.dev/) by first installing [this GROQ extension](https://github.com/juice49/zed-groq) and then adding the following configuration to your `~/.config/zed/settings.json`. Make sure to install the command first using `cargo install` or similar.
+
+```json
+  "languages": {
+    "GROQ": {
+      "formatter": {
+        "external": { "command": "groq-format", "arguments": [] },
+      },
+      "format_on_save": "on",
+    },
+  },
+```
+
 ## CLI Usage
 
 ```bash
