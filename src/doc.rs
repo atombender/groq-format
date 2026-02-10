@@ -28,11 +28,7 @@ impl Doc {
     /// Create a text document.
     pub fn text(s: impl Into<String>) -> Doc {
         let s = s.into();
-        if s.is_empty() {
-            Doc::Nil
-        } else {
-            Doc::Text(s)
-        }
+        if s.is_empty() { Doc::Nil } else { Doc::Text(s) }
     }
 
     /// Create a line break that becomes a space in flat mode.

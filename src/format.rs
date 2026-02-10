@@ -3,6 +3,38 @@
 use crate::doc::Doc;
 use groq_parser::ast::*;
 
+/// Format a full parse result (function definitions + expression) as a document.
+pub fn format_parse_result(result: &ParseResult) -> Doc {
+    if result.functions.is_empty() {
+        return format_expr(&result.expr);
+    }
+
+    let func_docs: Vec<Doc> = result
+        .functions
+        .iter()
+        .map(format_function_definition)
+        .collect();
+    let funcs = Doc::join(Doc::text("\n"), func_docs);
+
+    Doc::concat([funcs, Doc::text("\n\n"), format_expr(&result.expr)])
+}
+
+fn format_function_definition(func: &FunctionDefinition) -> Doc {
+    let name = format!("{}::{}", func.id.namespace, func.id.name);
+    let params: Vec<String> = func
+        .parameters
+        .iter()
+        .map(|p| format!("${}", p.name))
+        .collect();
+    let params_str = params.join(", ");
+
+    Doc::concat([
+        Doc::text(format!("fn {}({}) = ", name, params_str)),
+        format_expr(&func.body),
+        Doc::text(";"),
+    ])
+}
+
 /// Format a GROQ expression as a document.
 pub fn format_expr(expr: &Expr) -> Doc {
     match expr {
@@ -17,10 +49,7 @@ pub fn format_expr(expr: &Expr) -> Doc {
             let constraint = format_expr(&filter.constraint.expression);
             Doc::concat([
                 lhs,
-                Doc::group(Doc::concat([
-                    Doc::text("["),
-                    constraint,
-                ])),
+                Doc::group(Doc::concat([Doc::text("["), constraint])),
                 Doc::text("]"),
             ])
         }
@@ -63,11 +92,9 @@ pub fn format_expr(expr: &Expr) -> Doc {
         Expr::FunctionCall(func) => format_function_call(func),
         Expr::Array(arr) => format_array(arr),
         Expr::Object(obj) => format_object(obj),
-        Expr::Group(grp) => Doc::concat([
-            Doc::text("("),
-            format_expr(&grp.expression),
-            Doc::text(")"),
-        ]),
+        Expr::Group(grp) => {
+            Doc::concat([Doc::text("("), format_expr(&grp.expression), Doc::text(")")])
+        }
         Expr::Range(range) => format_range(range),
         Expr::Ellipsis(_) => Doc::text("..."),
         Expr::Constraint(c) => format_expr(&c.expression),
@@ -124,9 +151,10 @@ fn format_dot(dot: &DotOperator) -> Doc {
 
     // After dereference (->), don't add extra dot
     if let Expr::Postfix(post) = dot.lhs.as_ref()
-        && post.operator == Token::Arrow {
-            return Doc::concat([lhs, rhs]);
-        }
+        && post.operator == Token::Arrow
+    {
+        return Doc::concat([lhs, rhs]);
+    }
 
     Doc::concat([lhs, Doc::text("."), rhs])
 }
@@ -166,12 +194,12 @@ fn format_postfix(postfix: &PostfixOperator) -> Doc {
     let op = postfix.operator.literal();
 
     // Add space before asc/desc
-    let op_text = if postfix.operator == Token::AscOperator || postfix.operator == Token::DescOperator
-    {
-        format!(" {}", op)
-    } else {
-        op.to_string()
-    };
+    let op_text =
+        if postfix.operator == Token::AscOperator || postfix.operator == Token::DescOperator {
+            format!(" {}", op)
+        } else {
+            op.to_string()
+        };
 
     Doc::concat([operand, Doc::text(op_text)])
 }
@@ -207,10 +235,7 @@ fn format_array(arr: &Array) -> Doc {
 
     Doc::concat([
         Doc::text("["),
-        Doc::group(Doc::nest(
-            2,
-            Doc::concat([Doc::line_or_empty(), content]),
-        )),
+        Doc::group(Doc::nest(2, Doc::concat([Doc::line_or_empty(), content]))),
         Doc::text("]"),
     ])
 }

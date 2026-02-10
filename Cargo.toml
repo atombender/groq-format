@@ -15,6 +15,6 @@ name = "groq-format"
 path = "src/main.rs"
 
 [dependencies]
-groq-parser = { git = "https://github.com/sanity-io/groq-parser-rs.git" }
+groq-parser = { git = "https://github.com/sanity-io/groq-parser-rs.git", rev = "70f2277" }
 clap = { version = "4", features = ["derive"] }
 tempfile = "3"
