@@ -218,12 +218,11 @@ fn format_function_call(func: &FunctionCall) -> Doc {
     let args: Vec<Doc> = func.arguments.iter().map(format_expr).collect();
     let arg_list = Doc::join(Doc::concat([Doc::text(","), Doc::line()]), args);
 
-    Doc::group(Doc::concat([
+    Doc::concat([
         Doc::text(format!("{}(", name)),
-        Doc::nest(2, Doc::concat([Doc::line_or_empty(), arg_list])),
-        Doc::line_or_empty(),
+        Doc::nest(2, Doc::group(arg_list)),
         Doc::text(")"),
-    ]))
+    ])
 }
 
 fn format_array(arr: &Array) -> Doc {
@@ -234,11 +233,12 @@ fn format_array(arr: &Array) -> Doc {
     let elems: Vec<Doc> = arr.expressions.iter().map(format_expr).collect();
     let content = Doc::join(Doc::concat([Doc::text(","), Doc::line()]), elems);
 
-    Doc::concat([
+    Doc::group(Doc::concat([
         Doc::text("["),
-        Doc::group(Doc::nest(2, Doc::concat([Doc::line_or_empty(), content]))),
+        Doc::nest(2, Doc::concat([Doc::line_or_empty(), content])),
+        Doc::line_or_empty(),
         Doc::text("]"),
-    ])
+    ]))
 }
 
 fn format_object(obj: &Object) -> Doc {
