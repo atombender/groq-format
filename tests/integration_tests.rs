@@ -255,3 +255,49 @@ fn test_line_wrapping_complex_conditions() {
     let result = format_query(input, 30).unwrap();
     assert_eq!(result, expected);
 }
+
+#[test]
+fn test_trailing_comment() {
+    let input = "* // fetch everything";
+    let expected = "* // fetch everything";
+
+    let result = format_query(input, 80).unwrap();
+    assert_eq!(result, expected);
+}
+
+#[test]
+fn test_leading_comment() {
+    let input = "// fetch all movies\n*[_type==\"movie\"]";
+    let expected = "// fetch all movies\n*[_type == \"movie\"]";
+
+    let result = format_query(input, 80).unwrap();
+    assert_eq!(result, expected);
+}
+
+#[test]
+fn test_trailing_comment_with_projection() {
+    let input = "*[_type==\"movie\"] // filter\n{title}";
+    let expected = "*[_type == \"movie\"] // filter\n{ title }";
+
+    let result = format_query(input, 80).unwrap();
+    assert_eq!(result, expected);
+}
+
+#[test]
+fn test_multiple_comments() {
+    let input = "// grab posts\n// only published\n*[_type==\"post\"&&published==true]";
+    let expected = "// grab posts\n// only published\n*[_type == \"post\" && published == true]";
+
+    let result = format_query(input, 80).unwrap();
+    assert_eq!(result, expected);
+}
+
+#[test]
+fn test_no_comments_unchanged() {
+    // Queries without comments should produce identical results
+    let input = r#"*[_type == "post"] { title }"#;
+    let expected = r#"*[_type == "post"] { title }"#;
+
+    let result = format_query(input, 80).unwrap();
+    assert_eq!(result, expected);
+}

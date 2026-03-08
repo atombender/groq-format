@@ -22,6 +22,9 @@ pub enum Doc {
     Group(Box<Doc>),
     /// Concatenation of two documents.
     Concat { left: Box<Doc>, right: Box<Doc> },
+    /// A forced line break that always becomes a newline, even in flat mode.
+    /// Used after line comments (`//`) where a newline is syntactically required.
+    HardLine,
 }
 
 impl Doc {
@@ -43,6 +46,12 @@ impl Doc {
         Doc::Line {
             space: String::new(),
         }
+    }
+
+    /// Create a forced line break (always a newline, even in flat mode).
+    /// Used after `//` comments where a newline is syntactically required.
+    pub fn hard_line() -> Doc {
+        Doc::HardLine
     }
 
     /// Nest a document with the given indentation.
@@ -130,6 +139,11 @@ pub fn pretty(width: usize, doc: Doc) -> String {
                     col = item.indent;
                 }
             }
+            Doc::HardLine => {
+                output.push('\n');
+                output.push_str(&spaces(item.indent));
+                col = item.indent;
+            }
             Doc::Nest { indent, doc } => {
                 items.push(Item {
                     indent: item.indent + indent,
@@ -195,6 +209,11 @@ fn fits_doc(width: usize, doc: &Doc, mode: Mode) -> bool {
                     remaining_width -= space.len();
                 }
                 // In break mode, line breaks always fit
+            }
+            Doc::HardLine => {
+                // A hard line never fits in flat mode — forces the
+                // enclosing group into break mode.
+                return false;
             }
             Doc::Nest { doc, .. } => {
                 // Nesting doesn't affect width calculation, just push the nested doc

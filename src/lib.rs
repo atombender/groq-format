@@ -18,7 +18,7 @@ mod format;
 
 pub use doc::Doc;
 pub use format::{format_expr, format_parse_result};
-use groq_parser::parser::Parser;
+use groq_parser::parser::{Parser, ParserConfig};
 
 /// Format a GROQ query string with the given maximum line width.
 ///
@@ -45,12 +45,13 @@ pub fn format_query(query: &str, width: usize) -> Result<String, FormatError> {
         return Err(FormatError::EmptyQuery);
     }
 
-    let mut parser = Parser::new(query);
+    let config = ParserConfig::without_param_validation().with_comments();
+    let mut parser = Parser::new_with_config(query, config);
     let result = parser
         .parse()
         .map_err(|e| FormatError::Parse(e.to_string()))?;
 
-    let doc = format_parse_result(&result);
+    let doc = format_parse_result(&result, query);
     Ok(doc::pretty(width, doc))
 }
 
