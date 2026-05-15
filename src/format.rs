@@ -13,14 +13,19 @@ struct Formatter<'a> {
     comments: &'a [Comment],
     /// Index of the next unconsumed comment.
     cursor: usize,
+    /// When true, introduce additional line-break points (binary operators,
+    /// filter brackets, parentheses, single-argument function calls) so that
+    /// the formatter wraps more aggressively to honor the width limit.
+    force_wrap: bool,
 }
 
 impl<'a> Formatter<'a> {
-    fn new(source: &'a str, comments: &'a [Comment]) -> Self {
+    fn new(source: &'a str, comments: &'a [Comment], force_wrap: bool) -> Self {
         Formatter {
             source,
             comments,
             cursor: 0,
+            force_wrap,
         }
     }
 
@@ -143,11 +148,23 @@ impl<'a> Formatter<'a> {
             Expr::Filter(filter) => {
                 let lhs = self.format_expr(&filter.lhs);
                 let constraint = self.format_expr(&filter.constraint.expression);
-                Doc::concat([
-                    lhs,
-                    Doc::group(Doc::concat([Doc::text("["), constraint])),
-                    Doc::text("]"),
-                ])
+                if self.force_wrap {
+                    Doc::concat([
+                        lhs,
+                        Doc::text("["),
+                        Doc::group(Doc::concat([
+                            Doc::nest(2, Doc::concat([Doc::line_or_empty(), constraint])),
+                            Doc::line_or_empty(),
+                        ])),
+                        Doc::text("]"),
+                    ])
+                } else {
+                    Doc::concat([
+                        lhs,
+                        Doc::group(Doc::concat([Doc::text("["), constraint])),
+                        Doc::text("]"),
+                    ])
+                }
             }
             Expr::Slice(slice) => {
                 let lhs = self.format_expr(&slice.lhs);
@@ -199,11 +216,19 @@ impl<'a> Formatter<'a> {
             Expr::FunctionCall(func) => self.format_function_call(func),
             Expr::Array(arr) => self.format_array(arr),
             Expr::Object(obj) => self.format_object(obj),
-            Expr::Group(grp) => Doc::concat([
-                Doc::text("("),
-                self.format_expr(&grp.expression),
-                Doc::text(")"),
-            ]),
+            Expr::Group(grp) => {
+                let inner = self.format_expr(&grp.expression);
+                if self.force_wrap {
+                    Doc::group(Doc::concat([
+                        Doc::text("("),
+                        Doc::nest(2, Doc::concat([Doc::line_or_empty(), inner])),
+                        Doc::line_or_empty(),
+                        Doc::text(")"),
+                    ]))
+                } else {
+                    Doc::concat([Doc::text("("), inner, Doc::text(")")])
+                }
+            }
             Expr::Range(range) => self.format_range(range),
             Expr::Ellipsis(_) => Doc::text("..."),
             Expr::Constraint(c) => self.format_expr(&c.expression),
@@ -248,6 +273,16 @@ impl<'a> Formatter<'a> {
             return Doc::concat([left, Doc::text(": "), right]);
         }
 
+        if self.force_wrap {
+            return Doc::group(Doc::concat([
+                left,
+                Doc::nest(
+                    2,
+                    Doc::concat([Doc::line(), Doc::text(format!("{} ", op)), right]),
+                ),
+            ]));
+        }
+
         Doc::concat([left, Doc::text(format!(" {} ", op)), right])
     }
 
@@ -285,11 +320,20 @@ impl<'a> Formatter<'a> {
         let args: Vec<Doc> = func.arguments.iter().map(|a| self.format_expr(a)).collect();
         let arg_list = Doc::join(Doc::concat([Doc::text(","), Doc::line()]), args);
 
-        Doc::concat([
-            Doc::text(format!("{}(", name)),
-            Doc::nest(2, Doc::group(arg_list)),
-            Doc::text(")"),
-        ])
+        if self.force_wrap {
+            Doc::group(Doc::concat([
+                Doc::text(format!("{}(", name)),
+                Doc::nest(2, Doc::concat([Doc::line_or_empty(), arg_list])),
+                Doc::line_or_empty(),
+                Doc::text(")"),
+            ]))
+        } else {
+            Doc::concat([
+                Doc::text(format!("{}(", name)),
+                Doc::nest(2, Doc::group(arg_list)),
+                Doc::text(")"),
+            ])
+        }
     }
 
     fn format_array(&mut self, arr: &Array) -> Doc {
@@ -432,8 +476,10 @@ fn is_trailing_comment(source: &str, comment: &Comment) -> bool {
 
 /// Format a full parse result (function definitions + expression) as a document.
 /// The `source` parameter is the original query text, used for comment placement.
-pub fn format_parse_result(result: &ParseResult, source: &str) -> Doc {
-    let mut fmt = Formatter::new(source, &result.comments);
+/// When `force_wrap` is true, additional break points are introduced so the
+/// formatter wraps more aggressively when content exceeds the width.
+pub fn format_parse_result(result: &ParseResult, source: &str, force_wrap: bool) -> Doc {
+    let mut fmt = Formatter::new(source, &result.comments, force_wrap);
 
     let mut parts: Vec<Doc> = Vec::new();
 
@@ -482,6 +528,6 @@ pub fn format_parse_result(result: &ParseResult, source: &str) -> Doc {
 /// Format a GROQ expression as a document (without comment handling).
 /// This is the public API for formatting a standalone expression.
 pub fn format_expr(expr: &Expr) -> Doc {
-    let mut fmt = Formatter::new("", &[]);
+    let mut fmt = Formatter::new("", &[], false);
     fmt.format_expr(expr)
 }

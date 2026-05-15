@@ -10,7 +10,7 @@ use std::io::{self, Read, Write};
 use std::path::Path;
 
 use clap::Parser;
-use groq_format::{DEFAULT_WIDTH, format_query};
+use groq_format::{DEFAULT_WIDTH, FormatOptions, format_query_with_options};
 use tempfile::NamedTempFile;
 
 #[derive(Parser)]
@@ -29,6 +29,12 @@ struct Cli {
     /// Maximum line width
     #[arg(short = 'W', long = "width", default_value_t = DEFAULT_WIDTH)]
     width: usize,
+
+    /// Wrap more aggressively: introduce break points at binary operators,
+    /// filter brackets, parentheses and single-argument function calls so
+    /// long expressions are broken to honor the width limit.
+    #[arg(long = "force-wrap")]
+    force_wrap: bool,
 }
 
 fn main() {
@@ -40,25 +46,30 @@ fn main() {
 
 fn run() -> Result<(), Box<dyn std::error::Error>> {
     let cli = Cli::parse();
+    let options = FormatOptions::new(cli.width).with_force_wrap(cli.force_wrap);
 
     if cli.inputs.is_empty() {
         let mut input = String::new();
         io::stdin().read_to_string(&mut input)?;
 
-        let formatted = format_query(&input, cli.width)?;
+        let formatted = format_query_with_options(&input, &options)?;
         println!("{}", formatted);
     } else {
         for input in &cli.inputs {
-            process_file(Path::new(input), cli.write, cli.width)?;
+            process_file(Path::new(input), cli.write, &options)?;
         }
     }
 
     Ok(())
 }
 
-fn process_file(path: &Path, write: bool, width: usize) -> Result<(), Box<dyn std::error::Error>> {
+fn process_file(
+    path: &Path,
+    write: bool,
+    options: &FormatOptions,
+) -> Result<(), Box<dyn std::error::Error>> {
     let input = fs::read_to_string(path)?;
-    let formatted = format_query(&input, width)?;
+    let formatted = format_query_with_options(&input, options)?;
 
     if write {
         // Write atomically: write to temp file in same dir, then rename

@@ -1,4 +1,4 @@
-use groq_format::{FormatError, format_query};
+use groq_format::{FormatError, FormatOptions, format_query, format_query_with_options};
 
 #[test]
 fn test_blog_post_query() {
@@ -300,4 +300,38 @@ fn test_no_comments_unchanged() {
 
     let result = format_query(input, 80).unwrap();
     assert_eq!(result, expected);
+}
+
+#[test]
+fn test_force_wrap_breaks_deep_expression() {
+    let input = "count(history[dateTime(timestamp) > (dateTime(now()) - 60 * 60 * 24)])";
+    let opts = FormatOptions::new(30).with_force_wrap(true);
+    let result = format_query_with_options(input, &opts).unwrap();
+    let expected = "count(
+  history[
+    dateTime(timestamp)
+      > (
+        dateTime(now())
+          - 60 * 60 * 24
+      )
+  ]
+)";
+    assert_eq!(result, expected);
+}
+
+#[test]
+fn test_force_wrap_leaves_fitting_queries_alone() {
+    let input = r#"*[_type == "post" && published == true] { _id, title }"#;
+    let opts = FormatOptions::new(80).with_force_wrap(true);
+    let result = format_query_with_options(input, &opts).unwrap();
+    assert_eq!(result, input);
+}
+
+#[test]
+fn test_force_wrap_disabled_does_not_break_arithmetic() {
+    // Without force_wrap, the expression has no break points and stays on a
+    // single (overflowing) line — preserving today's behavior.
+    let input = "count(history[dateTime(timestamp) > (dateTime(now()) - 60 * 60 * 24)])";
+    let result = format_query(input, 30).unwrap();
+    assert_eq!(result, input);
 }

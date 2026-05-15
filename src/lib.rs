@@ -20,6 +20,41 @@ pub use doc::Doc;
 pub use format::{format_expr, format_parse_result};
 use groq_parser::parser::{Parser, ParserConfig};
 
+/// Options that control how a query is formatted.
+#[derive(Debug, Clone, Copy)]
+pub struct FormatOptions {
+    /// Maximum line width.
+    pub width: usize,
+    /// When true, the formatter introduces additional break points
+    /// (binary operators, filter brackets, parenthesised groups,
+    /// single-argument function calls) so it wraps more aggressively
+    /// to honor the `width` limit. Expressions that would otherwise
+    /// be emitted on a single overflowing line will be broken.
+    pub force_wrap: bool,
+}
+
+impl FormatOptions {
+    /// Construct options with the given width and `force_wrap = false`.
+    pub fn new(width: usize) -> Self {
+        FormatOptions {
+            width,
+            force_wrap: false,
+        }
+    }
+
+    /// Enable or disable force-wrap mode.
+    pub fn with_force_wrap(mut self, force_wrap: bool) -> Self {
+        self.force_wrap = force_wrap;
+        self
+    }
+}
+
+impl Default for FormatOptions {
+    fn default() -> Self {
+        FormatOptions::new(DEFAULT_WIDTH)
+    }
+}
+
 /// Format a GROQ query string with the given maximum line width.
 ///
 /// # Arguments
@@ -40,6 +75,24 @@ use groq_parser::parser::{Parser, ParserConfig};
 /// assert_eq!(formatted, "*[_type == \"post\"] { title }");
 /// ```
 pub fn format_query(query: &str, width: usize) -> Result<String, FormatError> {
+    format_query_with_options(query, &FormatOptions::new(width))
+}
+
+/// Format a GROQ query string using the given [`FormatOptions`].
+///
+/// # Example
+///
+/// ```
+/// use groq_format::{format_query_with_options, FormatOptions};
+///
+/// let opts = FormatOptions::new(30).with_force_wrap(true);
+/// let formatted = format_query_with_options("count(a + b + c + d + e + f + g)", &opts).unwrap();
+/// assert!(formatted.contains('\n'));
+/// ```
+pub fn format_query_with_options(
+    query: &str,
+    options: &FormatOptions,
+) -> Result<String, FormatError> {
     let query = query.trim();
     if query.is_empty() {
         return Err(FormatError::EmptyQuery);
@@ -51,8 +104,8 @@ pub fn format_query(query: &str, width: usize) -> Result<String, FormatError> {
         .parse()
         .map_err(|e| FormatError::Parse(e.to_string()))?;
 
-    let doc = format_parse_result(&result, query);
-    Ok(doc::pretty(width, doc))
+    let doc = format_parse_result(&result, query, options.force_wrap);
+    Ok(doc::pretty(options.width, doc))
 }
 
 /// Errors that can occur during formatting.
