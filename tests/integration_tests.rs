@@ -187,6 +187,17 @@ fn test_malformed_queries() {
 }
 
 #[test]
+fn test_projection_after_dot_is_rejected() {
+    // A projection must follow the base expression directly; `.{ ... }` is
+    // not valid GROQ and the parser rejects it.
+    let result = format_query(r#"*[_type == "author"].{name}"#, 80);
+    assert!(matches!(result, Err(FormatError::Parse(_))));
+
+    let formatted = format_query(r#"*[_type == "author"]{name}"#, 80).unwrap();
+    assert_eq!(formatted, r#"*[_type == "author"] { name }"#);
+}
+
+#[test]
 fn test_line_wrapping_narrow_width() {
     let input = r#"*[_type=="test"]{field1,field2,field3,field4,field5}"#;
     let expected = r#"*[_type == "test"] {
