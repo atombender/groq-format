@@ -169,7 +169,7 @@ dependencies = [
 [[package]]
 name = "groq-parser"
 version = "0.1.0"
-source = "git+https://github.com/sanity-io/groq-parser-rs.git?rev=82e343c#82e343c77d6221133e48ed98a3c5329c9781ddf0"
+source = "git+https://github.com/sanity-io/groq-parser-rs.git#216445b41fd41fa9d5896898cb97cdf44f4c7856"
 dependencies = [
  "serde",
  "serde_json",
