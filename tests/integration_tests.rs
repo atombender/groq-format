@@ -346,3 +346,41 @@ fn test_force_wrap_disabled_does_not_break_arithmetic() {
     let result = format_query(input, 30).unwrap();
     assert_eq!(result, input);
 }
+
+#[test]
+fn test_bracket_attribute_access_with_non_identifier_key() {
+    let cases = [
+        (
+            r#"*[title["en-US"] == "Hello"]"#,
+            r#"*[title["en-US"] == "Hello"]"#,
+        ),
+        (r#"*[@["b-c"] == 1]"#, r#"*[@["b-c"] == 1]"#),
+        (r#"author->["b-c"]"#, r#"author->["b-c"]"#),
+        (r#"person["Full Name"]"#, r#"person["Full Name"]"#),
+        (r#"*[@["1"] == 1]"#, r#"*[@["1"] == 1]"#),
+        (r#"*[@[""] == "bar"]"#, r#"*[@[""] == "bar"]"#),
+        (r#"a["say \"hi\""]"#, r#"a["say \"hi\""]"#),
+        (r#"a["back\\slash"]"#, r#"a["back\\slash"]"#),
+        (r#"a["x-y"].z["q r"]"#, r#"a["x-y"].z["q r"]"#),
+        (r#"a->["x-y"]["z"]"#, r#"a->["x-y"].z"#),
+    ];
+
+    for (input, expected) in cases {
+        let result = format_query(input, 80).unwrap();
+        assert_eq!(result, expected, "input: {input}");
+        assert_eq!(
+            format_query(&result, 80).unwrap(),
+            result,
+            "not idempotent: {input}"
+        );
+    }
+}
+
+#[test]
+fn test_bracket_attribute_access_with_identifier_key() {
+    let input = r#"a["b"]->["c_1"]"#;
+    let expected = "a.b->c_1";
+
+    let result = format_query(input, 80).unwrap();
+    assert_eq!(result, expected);
+}

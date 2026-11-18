@@ -245,6 +245,13 @@ impl<'a> Formatter<'a> {
         let lhs = self.format_expr(&dot.lhs);
         let rhs = self.format_expr(&dot.rhs);
 
+        if let Expr::Attribute(attr) = dot.rhs.as_ref()
+            && !is_identifier(&attr.name)
+        {
+            let key = Doc::text(format!("[\"{}\"]", escape_string(&attr.name)));
+            return Doc::concat([lhs, key]);
+        }
+
         if let Expr::Postfix(post) = dot.lhs.as_ref()
             && post.operator == Token::Arrow
         {
@@ -413,6 +420,13 @@ fn format_literal(lit: &Literal) -> Doc {
         Literal::Boolean(b) => Doc::text(if b.value { "true" } else { "false" }),
         Literal::Null(_) => Doc::text("null"),
     }
+}
+
+/// Whether `name` can be written as a bare attribute after `.` or `->`.
+fn is_identifier(name: &str) -> bool {
+    let mut chars = name.chars();
+    matches!(chars.next(), Some(c) if c.is_ascii_alphabetic() || c == '_')
+        && chars.all(|c| c.is_ascii_alphanumeric() || c == '_')
 }
 
 fn escape_string(s: &str) -> String {
