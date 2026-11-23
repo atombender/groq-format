@@ -1,0 +1,1 @@
+*[!(_type match "system.*") && !defined(hidden) && -price < 0 && !(_id in path("drafts.**"))]

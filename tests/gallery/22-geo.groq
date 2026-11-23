@@ -1,0 +1,1 @@
+*[_type == "store" && geo::distance(location, $origin) < 10000] | order(geo::distance(location, $origin) asc){name, "distance": geo::distance(location, $origin)}

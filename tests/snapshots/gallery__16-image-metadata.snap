@@ -1,0 +1,85 @@
+---
+source: tests/gallery.rs
+expression: snapshot
+---
+--- width 40
+*[_type == "post"] {
+  mainImage {
+    asset->{
+      _id,
+      url,
+      metadata {
+        lqip,
+        blurHash,
+        palette {
+          dominant {
+            background,
+            foreground
+          }
+        },
+        dimensions {
+          width,
+          height,
+          aspectRatio
+        }
+      }
+    },
+    alt,
+    hotspot,
+    crop
+  }
+}
+--- width 60
+*[_type == "post"] {
+  mainImage {
+    asset->{
+      _id,
+      url,
+      metadata {
+        lqip,
+        blurHash,
+        palette { dominant { background, foreground } },
+        dimensions { width, height, aspectRatio }
+      }
+    },
+    alt,
+    hotspot,
+    crop
+  }
+}
+--- width 80
+*[_type == "post"] {
+  mainImage {
+    asset->{
+      _id,
+      url,
+      metadata {
+        lqip,
+        blurHash,
+        palette { dominant { background, foreground } },
+        dimensions { width, height, aspectRatio }
+      }
+    },
+    alt,
+    hotspot,
+    crop
+  }
+}
+--- width 120
+*[_type == "post"] {
+  mainImage {
+    asset->{
+      _id,
+      url,
+      metadata {
+        lqip,
+        blurHash,
+        palette { dominant { background, foreground } },
+        dimensions { width, height, aspectRatio }
+      }
+    },
+    alt,
+    hotspot,
+    crop
+  }
+}

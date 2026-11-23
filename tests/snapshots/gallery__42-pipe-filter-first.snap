@@ -1,0 +1,48 @@
+---
+source: tests/gallery.rs
+expression: snapshot
+---
+--- width 40
+*[
+  _type == "product"
+  && store.status == "active"
+  && count(store.variants[
+    @->store.isDeleted != true
+  ]) > 0
+  && defined(store.slug.current)
+]
+  | order(store.title asc)[0...$pageSize] {
+    _id,
+    "title": store.title,
+    "price":
+      store.priceRange.minVariantPrice
+  }
+--- width 60
+*[
+  _type == "product"
+  && store.status == "active"
+  && count(store.variants[@->store.isDeleted != true]) > 0
+  && defined(store.slug.current)
+] | order(store.title asc)[0...$pageSize] {
+  _id,
+  "title": store.title,
+  "price": store.priceRange.minVariantPrice
+}
+--- width 80
+*[
+  _type == "product"
+  && store.status == "active"
+  && count(store.variants[@->store.isDeleted != true]) > 0
+  && defined(store.slug.current)
+] | order(store.title asc)[0...$pageSize] {
+  _id,
+  "title": store.title,
+  "price": store.priceRange.minVariantPrice
+}
+--- width 120
+*[
+  _type == "product"
+  && store.status == "active"
+  && count(store.variants[@->store.isDeleted != true]) > 0
+  && defined(store.slug.current)
+] | order(store.title asc)[0...$pageSize] { _id, "title": store.title, "price": store.priceRange.minVariantPrice }

@@ -1,0 +1,1 @@
+*[(_type == "post" && published == true && defined(publishedAt)) || (_type == "page" && !defined(parent)) || _id in $pinnedIds]

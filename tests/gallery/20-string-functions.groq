@@ -1,0 +1,1 @@
+*[_type == "person" && string::startsWith(lower(name), lower($prefix))]{name, "initials": string::split(name, " ")[0], "upper": upper(name), "id": string(_id)}

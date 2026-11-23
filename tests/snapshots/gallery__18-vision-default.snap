@@ -1,0 +1,39 @@
+---
+source: tests/gallery.rs
+expression: snapshot
+---
+--- width 40
+*[_type == "movie"][0...10] {
+  _id,
+  title,
+  releaseDate,
+  "director": crewMembers[
+    job == "Director"
+  ][0].person->name,
+  "cast": castMembers[0...3].person->name
+}
+--- width 60
+*[_type == "movie"][0...10] {
+  _id,
+  title,
+  releaseDate,
+  "director":
+    crewMembers[job == "Director"][0].person->name,
+  "cast": castMembers[0...3].person->name
+}
+--- width 80
+*[_type == "movie"][0...10] {
+  _id,
+  title,
+  releaseDate,
+  "director": crewMembers[job == "Director"][0].person->name,
+  "cast": castMembers[0...3].person->name
+}
+--- width 120
+*[_type == "movie"][0...10] {
+  _id,
+  title,
+  releaseDate,
+  "director": crewMembers[job == "Director"][0].person->name,
+  "cast": castMembers[0...3].person->name
+}

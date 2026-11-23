@@ -1,0 +1,53 @@
+---
+source: tests/gallery.rs
+expression: snapshot
+---
+--- width 40
+*[
+  _type == "page" && language == $lang
+] {
+  "title": coalesce(
+    title[$lang],
+    title.en,
+    title.no,
+    "Untitled"
+  ),
+  "slug": slug.current,
+  "translations": *[
+    _type == "translation.metadata"
+    && references(^._id)
+  ].translations[].value->{
+    "slug": slug.current,
+    language
+  }
+}
+--- width 60
+*[_type == "page" && language == $lang] {
+  "title": coalesce(
+    title[$lang],
+    title.en,
+    title.no,
+    "Untitled"
+  ),
+  "slug": slug.current,
+  "translations": *[
+    _type == "translation.metadata" && references(^._id)
+  ].translations[].value->{ "slug": slug.current, language }
+}
+--- width 80
+*[_type == "page" && language == $lang] {
+  "title": coalesce(title[$lang], title.en, title.no, "Untitled"),
+  "slug": slug.current,
+  "translations": *[
+    _type == "translation.metadata" && references(^._id)
+  ].translations[].value->{ "slug": slug.current, language }
+}
+--- width 120
+*[_type == "page" && language == $lang] {
+  "title": coalesce(title[$lang], title.en, title.no, "Untitled"),
+  "slug": slug.current,
+  "translations": *[_type == "translation.metadata" && references(^._id)].translations[].value->{
+    "slug": slug.current,
+    language
+  }
+}

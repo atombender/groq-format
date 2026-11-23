@@ -1,0 +1,54 @@
+---
+source: tests/gallery.rs
+expression: snapshot
+---
+--- width 40
+*[
+  _type == $type
+  && nationalDexNumber >= 1
+  && nationalDexNumber <= 151
+  && count(types[
+    lower(@->name) == "water"
+  ]) > 0
+]
+  | order(
+    baseStats.attack desc,
+    nationalDexNumber asc
+  ) {
+    name,
+    nationalDexNumber,
+    "types": types[]->name,
+    "attack": baseStats.attack
+  }
+--- width 60
+*[
+  _type == $type
+  && nationalDexNumber >= 1
+  && nationalDexNumber <= 151
+  && count(types[lower(@->name) == "water"]) > 0
+] | order(baseStats.attack desc, nationalDexNumber asc) {
+  name,
+  nationalDexNumber,
+  "types": types[]->name,
+  "attack": baseStats.attack
+}
+--- width 80
+*[
+  _type == $type
+  && nationalDexNumber >= 1
+  && nationalDexNumber <= 151
+  && count(types[lower(@->name) == "water"]) > 0
+] | order(baseStats.attack desc, nationalDexNumber asc) {
+  name,
+  nationalDexNumber,
+  "types": types[]->name,
+  "attack": baseStats.attack
+}
+--- width 120
+*[_type == $type && nationalDexNumber >= 1 && nationalDexNumber <= 151 && count(types[lower(@->name) == "water"]) > 0]
+  | order(baseStats.attack desc, nationalDexNumber asc) {
+    name,
+    nationalDexNumber,
+    "types": types[]->name,
+    "attack": baseStats.attack
+  }

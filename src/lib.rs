@@ -25,11 +25,10 @@ use groq_parser::parser::{Parser, ParserConfig};
 pub struct FormatOptions {
     /// Maximum line width.
     pub width: usize,
-    /// When true, the formatter introduces additional break points
-    /// (binary operators, filter brackets, parenthesised groups,
-    /// single-argument function calls) so it wraps more aggressively
-    /// to honor the `width` limit. Expressions that would otherwise
-    /// be emitted on a single overflowing line will be broken.
+    /// When true, the formatter wraps more aggressively: comparison and
+    /// arithmetic operators break as soon as an expression does not fit
+    /// (instead of only when nothing else helps), and calls with a single
+    /// short argument, like `dateTime(now())`, may break too.
     pub force_wrap: bool,
 }
 

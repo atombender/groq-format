@@ -1,0 +1,1 @@
+*[_type == "movie"] | order(releaseDate desc)[0...10] { title, "director": crewMembers[job == "Director"][0].person->name, "cast": castMembers[0...3].person->name | order(@ asc) }

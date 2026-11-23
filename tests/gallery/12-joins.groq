@@ -1,0 +1,1 @@
+*[_type == "author"] | order(name asc) {name, "slug": slug.current, "posts": *[_type == "post" && author._ref == ^._id] | order(publishedAt desc)[0...5] {title, "slug": slug.current, publishedAt}, "postCount": count(*[_type == "post" && references(^._id)])}

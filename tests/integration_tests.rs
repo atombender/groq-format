@@ -7,10 +7,10 @@ fn test_blog_post_query() {
   _id,
   title,
   slug,
-  author-> { name, image { asset-> { url } } },
+  author->{ name, image { asset->{ url } } },
   publishedAt,
   excerpt,
-  categories[]-> { title, slug }
+  categories[]->{ title, slug }
 }"#;
 
     let result = format_query(input, 80).unwrap();
@@ -24,9 +24,9 @@ fn test_ecommerce_product_query() {
   _id,
   name,
   price,
-  images[] { asset-> { url } },
+  images[] { asset->{ url } },
   variants[] { name, price },
-  categories[]-> { title, slug },
+  categories[]->{ title, slug },
   tags
 }"#;
 
@@ -39,17 +39,17 @@ fn test_nested_reference_projection() {
     let input = r#"*[_type=="article"]{title,author->{name,bio,image{asset->{url,metadata{dimensions{width,height}}}}},tags[]->{name,slug}}"#;
     let expected = r#"*[_type == "article"] {
   title,
-  author-> {
+  author->{
     name,
     bio,
     image {
-      asset-> {
+      asset->{
         url,
         metadata { dimensions { width, height } }
       }
     }
   },
-  tags[]-> { name, slug }
+  tags[]->{ name, slug }
 }"#;
 
     let result = format_query(input, 50).unwrap();
@@ -73,14 +73,12 @@ fn test_pipe_operations() {
 #[test]
 fn test_complex_filters() {
     let input = r#"*[_type in["post","article"]&&defined(slug.current)&&published==true&&(!defined(category)||category->slug.current!="draft")]{_id,title,slug,publishedAt}"#;
-    let expected = r#"*[_type in ["post", "article"] && defined(slug.current)
+    let expected = r#"*[
+  _type in ["post", "article"]
+  && defined(slug.current)
   && published == true
-  && (!defined(category) || category->slug.current != "draft")] {
-  _id,
-  title,
-  slug,
-  publishedAt
-}"#;
+  && (!defined(category) || category->slug.current != "draft")
+] { _id, title, slug, publishedAt }"#;
 
     let result = format_query(input, 70).unwrap();
     assert_eq!(result, expected);
@@ -91,7 +89,7 @@ fn test_array_operations() {
     let input = r#"*[_type=="portfolio"]{title,images[0..5]{asset->{url}},skills[defined(name)]{name,level},projects[]{name,url,status}}"#;
     let expected = r#"*[_type == "portfolio"] {
   title,
-  images[0..5] { asset-> { url } },
+  images[0..5] { asset->{ url } },
   skills[defined(name)] { name, level },
   projects[] { name, url, status }
 }"#;
@@ -122,8 +120,8 @@ fn test_order_and_slice() {
   _id,
   rating,
   comment,
-  customer-> { name },
-  product-> { title }
+  customer->{ name },
+  product->{ title }
 }"#;
 
     let result = format_query(input, 70).unwrap();
@@ -158,10 +156,8 @@ fn test_empty_structures() {
 #[test]
 fn test_unicode_and_special_chars() {
     let input = r#"*[_type=="test"]{title:"Hello 🌍 World",description:"café résumé naïve"}"#;
-    let expected = r#"*[_type == "test"] {
-  title: "Hello 🌍 World",
-  description: "café résumé naïve"
-}"#;
+    let expected =
+        r#"*[_type == "test"] { title: "Hello 🌍 World", description: "café résumé naïve" }"#;
 
     let result = format_query(input, 80).unwrap();
     assert_eq!(result, expected);
@@ -237,9 +233,7 @@ fn test_custom_function_with_projection() {
     let input = r#"fn my::full($p) = $p.first + " " + $p.last; *[_type=="person"]{"fullName": my::full(@)}"#;
     let expected = r#"fn my::full($p) = $p.first + " " + $p.last;
 
-*[_type == "person"] {
-  "fullName": my::full(@)
-}"#;
+*[_type == "person"] { "fullName": my::full(@) }"#;
 
     let result = format_query(input, 80).unwrap();
     assert_eq!(result, expected);
@@ -258,10 +252,12 @@ fn test_no_custom_functions() {
 #[test]
 fn test_line_wrapping_complex_conditions() {
     let input = r#"*[_type=="test"&&condition1&&condition2&&condition3]"#;
-    let expected = r#"*[_type == "test"
+    let expected = r#"*[
+  _type == "test"
   && condition1
   && condition2
-  && condition3]"#;
+  && condition3
+]"#;
 
     let result = format_query(input, 30).unwrap();
     assert_eq!(result, expected);
@@ -318,15 +314,13 @@ fn test_force_wrap_breaks_deep_expression() {
     let input = "count(history[dateTime(timestamp) > (dateTime(now()) - 60 * 60 * 24)])";
     let opts = FormatOptions::new(30).with_force_wrap(true);
     let result = format_query_with_options(input, &opts).unwrap();
-    let expected = "count(
-  history[
-    dateTime(timestamp)
-      > (
-        dateTime(now())
-          - 60 * 60 * 24
-      )
-  ]
-)";
+    let expected = "count(history[
+  dateTime(timestamp)
+    > (
+      dateTime(now())
+        - 60 * 60 * 24
+    )
+])";
     assert_eq!(result, expected);
 }
 
@@ -339,12 +333,23 @@ fn test_force_wrap_leaves_fitting_queries_alone() {
 }
 
 #[test]
-fn test_force_wrap_disabled_does_not_break_arithmetic() {
-    // Without force_wrap, the expression has no break points and stays on a
-    // single (overflowing) line — preserving today's behavior.
+fn test_operators_break_only_when_needed() {
     let input = "count(history[dateTime(timestamp) > (dateTime(now()) - 60 * 60 * 24)])";
-    let result = format_query(input, 30).unwrap();
-    assert_eq!(result, input);
+    let result = format_query(input, 60).unwrap();
+    let expected = "count(history[
+  dateTime(timestamp) > (dateTime(now()) - 60 * 60 * 24)
+])";
+    assert_eq!(result, expected);
+}
+
+#[test]
+fn test_force_wrap_breaks_before_operators_eagerly() {
+    let input = r#"*[_type == "post"] { "excerpt": array::join(string::split(pt::text(body), "")[0...255], "") + "…" }"#;
+    let default = format_query(input, 40).unwrap();
+    let forced =
+        format_query_with_options(input, &FormatOptions::new(40).with_force_wrap(true)).unwrap();
+    assert!(default.ends_with(") + \"…\"\n}"), "{default}");
+    assert!(forced.ends_with(")\n    + \"…\"\n}"), "{forced}");
 }
 
 #[test]

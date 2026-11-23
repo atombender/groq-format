@@ -1,0 +1,34 @@
+---
+source: tests/gallery.rs
+expression: snapshot
+---
+--- width 40
+*[_type == "movie"]
+  | order(releaseDate desc)[0...10] {
+    title,
+    "director": crewMembers[
+      job == "Director"
+    ][0].person->name,
+    "cast":
+      castMembers[0...3].person->name
+      | order(@ asc)
+  }
+--- width 60
+*[_type == "movie"] | order(releaseDate desc)[0...10] {
+  title,
+  "director":
+    crewMembers[job == "Director"][0].person->name,
+  "cast": castMembers[0...3].person->name | order(@ asc)
+}
+--- width 80
+*[_type == "movie"] | order(releaseDate desc)[0...10] {
+  title,
+  "director": crewMembers[job == "Director"][0].person->name,
+  "cast": castMembers[0...3].person->name | order(@ asc)
+}
+--- width 120
+*[_type == "movie"] | order(releaseDate desc)[0...10] {
+  title,
+  "director": crewMembers[job == "Director"][0].person->name,
+  "cast": castMembers[0...3].person->name | order(@ asc)
+}

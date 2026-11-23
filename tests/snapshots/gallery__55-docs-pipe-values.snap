@@ -1,0 +1,47 @@
+---
+source: tests/gallery.rs
+expression: snapshot
+---
+--- width 40
+{
+  "codepointOrder":
+    [
+      "Zebra",
+      "apple",
+      "banana",
+      "Ápple",
+      "Émile",
+      "árbol"
+    ] | order(@),
+  "lowerOnlyFixesCase":
+    [
+      "Zebra",
+      "apple",
+      "banana",
+      "Ápple",
+      "Émile",
+      "árbol"
+    ] | order(string::lower(@))
+}
+--- width 60
+{
+  "codepointOrder":
+    ["Zebra", "apple", "banana", "Ápple", "Émile", "árbol"]
+    | order(@),
+  "lowerOnlyFixesCase":
+    ["Zebra", "apple", "banana", "Ápple", "Émile", "árbol"]
+    | order(string::lower(@))
+}
+--- width 80
+{
+  "codepointOrder":
+    ["Zebra", "apple", "banana", "Ápple", "Émile", "árbol"] | order(@),
+  "lowerOnlyFixesCase":
+    ["Zebra", "apple", "banana", "Ápple", "Émile", "árbol"]
+    | order(string::lower(@))
+}
+--- width 120
+{
+  "codepointOrder": ["Zebra", "apple", "banana", "Ápple", "Émile", "árbol"] | order(@),
+  "lowerOnlyFixesCase": ["Zebra", "apple", "banana", "Ápple", "Émile", "árbol"] | order(string::lower(@))
+}

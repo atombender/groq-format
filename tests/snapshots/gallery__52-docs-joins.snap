@@ -1,0 +1,41 @@
+---
+source: tests/gallery.rs
+expression: snapshot
+---
+--- width 40
+*[_type in ["employee", "department"]] {
+  ...,
+  _type == "employee" => {
+    department->
+  },
+  _type == "department" => {
+    "employees": *[
+      _type == "employee"
+      && department._ref == ^._id
+    ]
+  }
+}
+--- width 60
+*[_type in ["employee", "department"]] {
+  ...,
+  _type == "employee" => { department-> },
+  _type == "department" => {
+    "employees": *[
+      _type == "employee" && department._ref == ^._id
+    ]
+  }
+}
+--- width 80
+*[_type in ["employee", "department"]] {
+  ...,
+  _type == "employee" => { department-> },
+  _type == "department" => {
+    "employees": *[_type == "employee" && department._ref == ^._id]
+  }
+}
+--- width 120
+*[_type in ["employee", "department"]] {
+  ...,
+  _type == "employee" => { department-> },
+  _type == "department" => { "employees": *[_type == "employee" && department._ref == ^._id] }
+}

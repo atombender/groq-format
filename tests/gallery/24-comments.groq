@@ -1,0 +1,11 @@
+// Featured posts for the homepage
+*[_type == "post" // only posts
+  && featured == true
+  // hide drafts
+  && !(_id in path("drafts.**"))
+] | order(publishedAt desc) {
+  title, // the headline
+  "slug": slug.current,
+  // resolve the author reference
+  "author": author->name
+}

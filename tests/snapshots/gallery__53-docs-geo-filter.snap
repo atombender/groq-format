@@ -1,0 +1,39 @@
+---
+source: tests/gallery.rs
+expression: snapshot
+---
+--- width 40
+// Creates a "marathonRoutes" array that contains
+// all marathons whose routes intersect with the current neighborhood
+*[_type == "neighborhood"] {
+  "marathonRoutes": *[
+    _type == "marathon"
+    && geo::intersects(
+      ^.neighborhoodRegion,
+      routeLine
+    )
+  ]
+}
+--- width 60
+// Creates a "marathonRoutes" array that contains
+// all marathons whose routes intersect with the current neighborhood
+*[_type == "neighborhood"] {
+  "marathonRoutes": *[
+    _type == "marathon"
+    && geo::intersects(^.neighborhoodRegion, routeLine)
+  ]
+}
+--- width 80
+// Creates a "marathonRoutes" array that contains
+// all marathons whose routes intersect with the current neighborhood
+*[_type == "neighborhood"] {
+  "marathonRoutes": *[
+    _type == "marathon" && geo::intersects(^.neighborhoodRegion, routeLine)
+  ]
+}
+--- width 120
+// Creates a "marathonRoutes" array that contains
+// all marathons whose routes intersect with the current neighborhood
+*[_type == "neighborhood"] {
+  "marathonRoutes": *[_type == "marathon" && geo::intersects(^.neighborhoodRegion, routeLine)]
+}

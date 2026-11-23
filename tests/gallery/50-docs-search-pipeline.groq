@@ -1,0 +1,12 @@
+*[_type == "article" && !(_id in path("drafts.**"))] | score(
+  boost([title] match text::query("summer fashion"), 2),
+  boost(text::semanticSimilarity("comfortable warm weather clothing"), 1),
+  boost(category == "editorial", 1.5),
+  boost(publishedAt > "2024-01-01", 1.2)
+) | order(_score desc) [0...20] {
+  title,
+  slug,
+  excerpt,
+  _score,
+  "highlights": text::highlight()
+}

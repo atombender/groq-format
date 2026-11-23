@@ -1,0 +1,1 @@
+{"filters": [{"field": "title", "op": "match", "value": $q}, {"field": "_type", "op": "==", "value": "post"}, {"field": "rating", "op": ">=", "value": 4}], "results": *[_type == "post"][0...10]{title}}

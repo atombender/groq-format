@@ -1,0 +1,1 @@
+*[_type == "article" && slug.current == $slug][0]{title, body[]{..., _type == "image" => {"url": asset->url, "alt": coalesce(alt, asset->altText), "dimensions": asset->metadata.dimensions}, markDefs[]{..., _type == "internalLink" => {"slug": @.reference->slug.current, "type": @.reference->_type}}}}

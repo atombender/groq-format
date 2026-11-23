@@ -1,0 +1,1604 @@
+# sanity.io/docs/custom-groq-functions#1
+fn ex::name($author) = $author-> { "name": firstName + " " + lastName };
+
+*[_type == "post"]{
+  "author": ex::name(author)
+}
+# sanity.io/docs/custom-groq-functions#2
+fn ex::details($person) = $person{name, age}; 
+*[_type == "person"] { "info": ex::details(@) }
+# sanity.io/docs/custom-groq-functions#3
+fn ex::title($ref) = $ref->{title};
+*[_type == "person"] { "occupation": ex::title(occupation) }
+# sanity.io/docs/custom-groq-functions#4
+fn ex::items($arr) = $arr[]{name}; 
+*[_type == "person"] { "stuff": ex::items(belongings) }
+# sanity.io/docs/custom-groq-functions#5
+fn ex::pets($items) = $items[]->{name};
+*[_type == "person"] {"pet": ex::pets(pet)}
+# sanity.io/docs/custom-groq-functions#6
+fn ex::blocks($arr) = $arr {
+  ...,
+  _type == "docsCallout" => {
+    ...,
+    content[] {
+      ...,
+      markDefs[] {
+        ...,
+        _type == "link" => {
+          isInternal,
+          _key,
+          _type,
+          reference->,
+          url
+        },
+        _type == "acronym" => {
+          _key,
+          _type,
+          value
+        }
+      }
+    }
+  }
+};
+
+*[_type == "article"] {
+  _id,
+  title,
+  "slug": slug.current,
+  "content": ex::blocks(content[])
+}
+# sanity.io/docs/groq-functions#1.1
+// The pt namespace contains functions related to Portable Text
+// This function returns a plain text version of a Portable Text object
+pt::text(ptNode)
+# sanity.io/docs/groq-functions#1.2
+// The geo namespace contains functions related to geolocation
+// This function returns true if the second argument is fully contained in the first
+geo::contains(polygon, point)
+# sanity.io/docs/groq-functions#2.1
+// Non-namespaced
+references('someId')
+# sanity.io/docs/groq-functions#2.1
+// equates to
+global::references('someId')
+# sanity.io/docs/groq-functions#3.1
+// If title.es exists return title.es
+// Else return title.en
+// If neither exist, return null
+*[_type == "documentWithTranslations"]{
+  "title": coalesce(title.es, title.en)
+} 
+# sanity.io/docs/groq-functions#3.2
+// If rating exists, return rating,
+// Else return string of 'unknown'
+*[_type == 'movie']{
+  'rating': coalesce(rating, 'unknown')
+}
+# sanity.io/docs/groq-functions#4.1
+// Returns number of elements in array 'actors' on each movie
+*[_type == 'movie']{"actorCount": count(actors)} 
+# sanity.io/docs/groq-functions#4.2
+// Returns number of R-rated movies
+count(*[_type == 'movie' && rating == 'R'])
+# sanity.io/docs/groq-functions#5.1
+*[_type == "post"]{
+  title,
+  publishedAt,
+  "timeSincePublished": dateTime(now()) - dateTime(publishedAt)
+}
+# sanity.io/docs/groq-functions#6.1
+// Returns all documents if awardWinner has any value (of any type)
+*[defined(awardWinner)]
+# sanity.io/docs/groq-functions#7.1
+// Documents created by the current user, assuming you store the
+// creator's project user ID in a `createdBy` field on each document
+*[_type == "release" && createdBy == identity()]
+# sanity.io/docs/groq-functions#7.2
+// Custom-role document filter scoping records to a team of users,
+// where engineerUserIds holds project user IDs
+*[_type == "release" && identity() in engineerUserIds]
+# sanity.io/docs/groq-functions#8.1
+// Return posts with more than 2 authors
+*[_type == "post" && length(authors) > 2]{
+  title,
+  authors[]->{
+    name
+  }
+}
+# sanity.io/docs/groq-functions#9.1
+*{
+  "upperString": upper("Some String"), // Returns "SOME STRING"
+  "lowerString": lower("Some String")  // Returns "some string" 
+}
+# sanity.io/docs/groq-functions#10.1
+// Give me all posts with a publish date in the future
+*[_type == "post" && dateTime(now()) < dateTime(publishedAt)]
+# sanity.io/docs/groq-functions#11.1
+// _id matches a.b.c.d but not a.b.c.d.e
+*[_id in path("a.b.c.*")] 
+# sanity.io/docs/groq-functions#11.2
+// _id matches a.b.c.d and a.b.c.d.e
+*[_id in path("a.b.c.**")] 
+# sanity.io/docs/groq-functions#11.3
+// All draft documents
+*[_id in path("drafts.**")]
+# sanity.io/docs/groq-functions#11.4
+// Only published documents
+*[!(_id in path("drafts.**"))]
+# sanity.io/docs/groq-functions#12.1
+// Using the ^ operator to refer to the enclosing document. Here ^._id refers to the id
+// of the enclosing person record.
+*[_type=="person"]{
+  name,
+  "relatedMovies": *[_type=='movie' && references(^._id)]{ title }
+}
+# sanity.io/docs/groq-functions#13.1
+// If age is 18+, return "adult" string
+// Else if age is 13+, return "teen" string
+// Else return "child" string
+select(
+  age >= 18 => "adult",
+  age >= 13 => "teen",
+  "child"
+)
+# sanity.io/docs/groq-functions#13.2
+// If popularity integer is more than 20, return "high" string
+// Else if popularity is more than 10, return "medium" string
+// Else if popularity is less than or equal to 10, return "low"
+*[_type=='movie']{
+  ..., 
+  "popularity": select(
+    popularity > 20 => "high",
+    popularity > 10 => "medium",
+    popularity <= 10 => "low"
+)}
+# sanity.io/docs/groq-functions#13.3
+// You can also use select in a shorter from
+// Let's say we want to conditionally join references 
+// inside a Portable Text field
+*[_type == "article"]{
+  ...,
+  body[]{
+    ...,
+    _type == "product" => {
+      ...,
+      @->{
+        name,
+        price
+      }
+    }
+  }
+}
+# sanity.io/docs/groq-functions#14.1
+{
+  "stringInteger": string(21),         // Returns "21"
+  "stringFloat": string(3.14159),      // Returns "3.14159"
+  "stringSciNotation": string(3.6e+5), // Returns "360000"
+  "stringTrue": string(true),          // Returns "true"
+  "stringFalse": string(false),        // Returns "false"
+  "stringString": string("A string"),  // Returns "A string"
+}
+# sanity.io/docs/groq-functions#15.1
+*[0] {
+  'secondsAgo': dateTime(now()) - dateTime(_createdAt),
+} {
+  'minutesSinceCreated': 'Created ' + string(secondsAgo / 60) + ' minutes ago.'
+}
+# sanity.io/docs/groq-functions#16.1
+// Let's imagine a document with a year field,
+// which contains a four-digit number – in this example, 2009
+*[0] {
+  year    // Returns 2009
+}
+# sanity.io/docs/groq-functions#16.2
+// To compare year to a datetime field, such as now(), _createdAt,
+// or _updatedAt, the year field must be converted to a string in RFC3339 format,
+// but trying to append a string to the year field returns null
+*[0] {
+  'constructedYear': year + "-01-01T00:00:00Z"    // Returns null
+}
+# sanity.io/docs/groq-functions#16.3
+// Using the string() function, year can be coerced to a string
+// and structured in RFC3339 format
+*[0] {
+  'constructedYear': string(year) + "-01-01T00:00:00Z"    // Returns "2009-01-01T00:00:00Z"
+}
+# sanity.io/docs/groq-functions#16.4
+// In this way, the year field can be used to perform time arithmetic operations
+*[0] {
+  'secondsSinceYear': dateTime(now()) - dateTime(string(year) + "-01-01T00:00:00Z")
+}
+# sanity.io/docs/groq-functions#17.1
+// Returns a geo object corresponding to the center of Oslo
+geo::latLng(59.911491, 10.757933)
+# sanity.io/docs/groq-functions#18.1
+// Returns the distance in meters between Oslo and San Francisco
+// 7506713.963060733
+geo::distance(
+  geo::latLng(59.911491, 10.757933),
+  geo::latLng(37.7749, 122.4194)
+)
+# sanity.io/docs/groq-functions#18.2
+// Returns all documents that are storefronts
+// within 10 miles of the storefront geopoint
+*[
+  _type == 'storefront' &&
+  geo::distance(geoPoint, $currentLocation) < 16093.4
+]
+# sanity.io/docs/groq-functions#19.1
+// Returns true if the neighborhood region is fully contained by the city region
+geo::contains(cityRegion, neighborhoodRegion)
+# sanity.io/docs/groq-functions#19.2
+// For a given $currentLocation geopoint and deliveryZone area
+// Return stores that deliver to a user's location
+*[
+  _type == "storefront" &&
+  geo::contains(deliveryZone, $currentLocation)
+]
+# sanity.io/docs/groq-functions#20.1
+// Creates a "marathonRoutes" array that contains
+// all marathons whose routes intersect with the current neighborhood
+*[_type == "neighborhood"] {
+  "marathonRoutes": *[_type == "marathon" && 
+                        geo::intersects(^.neighborhoodRegion, routeLine)  
+                      ]
+}
+# sanity.io/docs/groq-functions#21.1
+// Returns the body Portable Text data as plain text
+*[_type == "post"] 
+  { "plaintextBody": pt::text(body) }
+# sanity.io/docs/groq-functions#21.2
+// Scores posts by the amount of times the string "GROQ"
+// appears in a Portable Text field
+*[_type == "post"]
+  | score(pt::text(body) match "GROQ")
+# sanity.io/docs/groq-functions#22.1
+{
+  'projectId': sanity::projectId(),  // Returns 'hm31oq0j', for example
+  'dataset': sanity::dataset()       // Returns 'production', for example
+}
+# sanity.io/docs/groq-functions#23.1
+*[sanity::versionOf("document-id")]
+# sanity.io/docs/groq-functions#24.1
+*[_type == "post"][0]{
+  _id,
+  mainImage{
+    "url": asset->url,
+    "aspects": documents::get(media).aspects
+  }
+}
+# sanity.io/docs/groq-functions#25.1
+// Find all documents being referenced by at least 1 GDR, and return the document's ID and reference count
+*[documents::incomingGlobalDocumentReferenceCount() > 0] { 
+  _id, 
+  "incomingGDRCount": documents::incomingGlobalDocumentReferenceCount() 
+}
+# sanity.io/docs/groq-functions#26.1
+*[_type == "post"][0]{
+  _id,
+  mainImage{
+    "url": asset->url,
+    "copyright": media::aspect(media, "copyright")
+  }
+}
+# sanity.io/docs/groq-functions#27.1
+delta::changedAny(selector) -> bool
+# sanity.io/docs/groq-functions#27.1
+delta::changedOnly(selector) -> bool
+# sanity.io/docs/groq-functions#27.2
+// Example: Return true when title has changed
+delta::changedAny(title)
+# sanity.io/docs/groq-functions#28.1
+diff::changedAny(before, after, selector) -> bool
+# sanity.io/docs/groq-functions#28.1
+diff::changedOnly(before, after, selector) -> bool
+# sanity.io/docs/groq-functions#28.2
+// Example: This returns true because last name has changed.
+diff::changedAny(
+  {"firstName":"Bob","lastName":"Odenkirk"},
+  {"firstName":"Bob","lastName":"Holm"},
+  (firstName, lastName)
+)
+# sanity.io/docs/groq-functions#29.1
+// One field:
+delta::changedAny(title)
+# sanity.io/docs/groq-functions#29.2
+// Multipe fields:
+delta::changedAny((title, description))
+# sanity.io/docs/groq-functions#29.3
+// Nested fields:
+delta::changedAny(slug.current)
+# sanity.io/docs/groq-functions#29.4
+// Fields on arrays:
+delta::changedAny(authors[].year)
+# sanity.io/docs/groq-functions#29.5
+// Nested fields on arrays:
+delta::changedAny(authors[].(year, name))
+# sanity.io/docs/groq-functions#29.6
+// Filters:
+delta::changedAny(authors[year > 1950].name)
+# sanity.io/docs/groq-functions#30.1
+// Returns "a.b.c"
+array::join(["a", "b", "c"], ".")
+# sanity.io/docs/groq-functions#30.2
+// Returns `null`
+array::join(1234, ".")
+# sanity.io/docs/groq-functions#30.2
+array::join([1, 2, 3], 1)
+# sanity.io/docs/groq-functions#30.3
+// Returns "a.b.<INVALID>.d"
+array::join(["a", "b", c, "d"], ".")
+# sanity.io/docs/groq-functions#31.1
+// Returns [1, 2, 3]
+array::compact([1, null, 2, null, 3])
+# sanity.io/docs/groq-functions#32.1
+// Returns [1, 2, 3, 4, 5]
+array::unique([1, 2, 2, 2, 3, 4, 5, 5])
+# sanity.io/docs/groq-functions#33.1
+// Returns true
+array::intersects([1, 2, 3], [3, 4, 5])
+# sanity.io/docs/groq-functions#33.2
+// Returns false
+array::intersects([1, 2, 3], ['foo', 'bar', 'baz'])
+# sanity.io/docs/groq-functions#34.1
+// Returns 2.5
+math::avg([1, 2, 3, 4, null])
+# sanity.io/docs/groq-functions#34.2
+// Returns `null`
+math::avg([1, 2, 3, 4, "5"])
+# sanity.io/docs/groq-functions#35.1
+// Returns 1000
+math::max([1, 10, 100, 1000])
+# sanity.io/docs/groq-functions#35.2
+// Returns `null`
+math::max([1, "10", 100, 1000])
+# sanity.io/docs/groq-functions#35.3
+// Returns `null`
+math::max([])
+# sanity.io/docs/groq-functions#36.1
+// Returns 1
+math::min([1, 10, null, 100, 1000])
+# sanity.io/docs/groq-functions#36.2
+// Returns `null`
+math::min([1, "10", 100, 1000])
+# sanity.io/docs/groq-functions#36.3
+// Returns `null`
+math::min([])
+# sanity.io/docs/groq-functions#37.1
+// Returns 10
+math::sum([1, 2, 3, 4, null])
+# sanity.io/docs/groq-functions#37.2
+// Returns `null`
+math::sum([1, 2, 3, 4, "5"])
+# sanity.io/docs/groq-functions#37.3
+// Returns 0
+math::sum([])
+# sanity.io/docs/groq-functions#38.1
+// Returns `true`
+string::startsWith("alphabet", "alpha")
+# sanity.io/docs/groq-functions#38.1
+string::startsWith("alphabet", "")
+# sanity.io/docs/groq-functions#38.2
+// Returns `false`
+string::startsWith("alphabet", "bet")
+# sanity.io/docs/groq-functions#39.1
+// Returns ["Split", "this", "sentence", "up"]
+string::split("Split this sentence up", " ")
+# sanity.io/docs/groq-functions#39.2
+// Returns ["a", "b", "c"]
+string::split("abc", "")
+# sanity.io/docs/groq-functions#39.3
+// Returns `null`
+string::split(12, "1")
+# sanity.io/docs/groq-functions#39.3
+string::split("This is 1 way to do it", 1)
+# sanity.io/docs/groq-functions#40.1
+// These score() functions behave identically
+* | score(title match "Red" || title match "Fish")
+# sanity.io/docs/groq-functions#40.1
+* | score(title match "Red", title match "Fish")
+# sanity.io/docs/groq-functions#40.2
+// These score() functions behave identically
+* | score(title match "Red" && title match "Fish")
+# sanity.io/docs/groq-functions#40.2
+* | score(title match "Red Fish")
+# sanity.io/docs/groq-functions#41.1
+// Each term that is true will increment _score by 1
+* | score(featured, internal, _type == 'post')
+# sanity.io/docs/groq-functions#42.1
+// Adds points to the score value depending 
+// on the use of the string "GROQ" in each post's description 
+// The value is then used to order the posts 
+*[_type == "post"] 
+  | score(description match "GROQ") 
+  | order(_score desc) 
+  { _score, title }
+# sanity.io/docs/groq-functions#42.2
+// Adds a point for matches in the title OR description
+*[_type == "post"] 
+  | score(title match "GROQ" || description match "GROQ") 
+  | order(_score desc) 
+  { _score, title }
+# sanity.io/docs/groq-functions#42.3
+// Orders blog posts by GROQ matches
+// Then filters the results for only items that matched
+// by checking for _score values greater than 0
+*[_type == "post"] 
+  | score(description match "GROQ") 
+  | order(_score desc) 
+  { _score, title }
+  [ _score > 0 ]
+# sanity.io/docs/groq-functions#43.1
+// Adds 1 to the score for each time $term is matched in the title field
+// Adds 3 to the score if (movie > 3) is true
+*[_type == "movie" && movieRating > 3] | 
+  score(
+    title match $term,
+    boost(movieRating > 8, 3)
+  )
+# sanity.io/docs/groq-functions#44.1
+// Creates a scoring system where $term matching in the title
+// is worth more than matching in the body
+*[_type == "movie" && movieRating > 3] | score(
+  boost(title match $term, 4),
+  boost(body match $term, 1),
+  boost(movieRating > 8, 3)
+)
+# sanity.io/docs/groq-functions#44.2
+// Scores games by the "impressive" difference in goals
+*[_type == "game"] | score(
+		boost(pointDifference > 5, 5),
+		boost(pointDifference > 10, 10)
+	)
+# sanity.io/docs/groq-functions#45.1
+// Boosts _score for matches in the title OR description,
+// but a match on the description now has less of an impact on _score
+*[_type == "post"] 
+  | score(title match "GROQ" || boost(description match "GROQ", 0.3)) 
+  | order(_score desc) 
+  { _score, title }
+# sanity.io/docs/groq-functions#46.1
+// Semantic search: rank all documents by meaning
+* | score(text::semanticSimilarity("how to handle user authentication"))
+# sanity.io/docs/groq-functions#46.2
+// Filtered semantic search: restrict which documents are scored
+*[_type == "product" && category == "footwear"]
+    | score(text::semanticSimilarity("leather waterproof boots"))
+# sanity.io/docs/groq-functions#46.3
+// Hybrid search: combine keyword matching with semantic scoring
+*[_type == "product"]
+    | score(
+        @ match text::query("leather waterproof boots"),
+        text::semanticSimilarity("leather waterproof boots")
+      )
+# sanity.io/docs/groq-functions#47.1
+// Match on a single attribute
+*[_type == "book" && title match text::query("frankenstein")]
+# sanity.io/docs/groq-functions#47.2
+// Match across multiple attributes
+*[_type == "book" && [title, details.blurb] match text::query("vampires")]
+# sanity.io/docs/groq-functions#47.3
+// Match on a nested object (searches all string fields within)
+*[_type == "book" && details match text::query("vampires")]
+# sanity.io/docs/groq-functions#47.4
+// Negation: exclude results matching a term
+*[_type == "phone" && description match text::query("google -pro")]
+# sanity.io/docs/groq-functions#47.5
+// Phrase with trailing wildcard
+*[_type == "phone" && description match text::query("\"Find o*\"")]
+# sanity.io/docs/groq-functions#47.6
+// Use with score() for relevance ranking
+*[_type == "book"]
+# sanity.io/docs/groq-functions#47.6
+    boost([details.blurb, details.keywords[]] match text::query("dracula"), 1.5)
+# sanity.io/docs/groq-functions#47.6
+// Match any string field in the document
+*[@ match text::query("hello world")]
+# sanity.io/docs/groq-functions#48.1
+*[_type == "article"] | score([title] match text::query("summer fashion")) {
+  title,
+  _score,
+  "highlights": text::highlight(@, text::query("summer fashion"))
+}
+# sanity.io/docs/groq-functions#49.1
+*[_type == "post" && branch == user::attributes().branch]
+# sanity.io/docs/groq-functions#50.1
+// Note: it's used without the filter, so no *[]
+releases::all()
+# sanity.io/docs/groq-functions#50.2
+// This is equivalent
+*[_type == "system.release"]
+# sanity.io/docs/groq-functions#51
+fn myFunctions::unfurl($ref) = $ref->{...};
+
+*[] {
+  title,
+  "author": myFunctions::unfurl(author)
+}
+# sanity.io/docs/groq-functions#52
+// Function definition
+fn user::bio($param) = $param{name, age}; 
+
+// Usage
+*[_type == "person"] { "info": user::bio(@) }
+# sanity.io/docs/groq-functions#53
+// Function definition
+fn user::bio($param) = $param->{name, age}; 
+
+// Usage
+*[_type == "post"] { "author": user::bio(author) }
+# sanity.io/docs/groq-functions#54
+// Function definition
+fn user::children($param) = $param[]{name}; 
+
+// Usage
+*[_type == "person"] { "children": user::children(children) }
+# sanity.io/docs/groq-functions#55
+// Function definition
+fn user::children($param) = $param[]->{name}; 
+
+// Usage
+*[_type == "person"] { "children": user::children(children) }
+# sanity.io/docs/groq-introduction#1.1
+*[_type == "movie" && releaseYear >= 1979]
+# sanity.io/docs/groq-introduction#2.1
+*[_type == "movie"]{ _id, title, releaseYear }
+# sanity.io/docs/groq-introduction#3.1
+*[_type == "movie"]{
+  _id, 
+  title,
+  "director": director->name
+}
+# sanity.io/docs/groq-introduction#4.1
+*[_type == "movie"] | order(releaseYear desc) [0...10]
+# sanity.io/docs/groq-joins#1.1
+*[ _type == "employee" ]{ ..., department-> }
+# sanity.io/docs/groq-joins#2.1
+*[ _type == "department" ]{
+  ...,
+  "employees": *[ _type == "employee" && department._ref == ^._id ]
+}
+# sanity.io/docs/groq-joins#3.1
+*[ _type == "department" ]{
+  ...,
+  "employees": *[ _type == "employee" && references(^._id) ]
+}
+# sanity.io/docs/groq-joins#5.1
+*[ _type == "employee" ]{
+  ...,
+  "departments": *[ _type == "department" && ^._id in employees[]._ref ],
+}
+# sanity.io/docs/groq-joins#6.1
+*[ _type in ["employee", "department"]]{
+  ...,
+  _type == "employee" => {
+    department->,
+  },
+  _type == "department" => {
+    "employees": *[ _type == "employee" && department._ref == ^._id ],
+  },
+}
+# sanity.io/docs/groq-joins#7.1
+*[ _type == "employee" ]{ ..., department-> }[ defined(department) ]
+# sanity.io/docs/groq-joins#8.1
+*[ _type == "employee" ]{
+  ...,
+  "department": *[ _type == "department" && _id == ^.department._ref ][0],
+}[ defined(department) ]
+# sanity.io/docs/groq-joins#9.1
+*[ _type == "employee" ]{
+  ...,
+  "betterDepartments": *[ _type == "department" && baseSalary > ^.salary ],
+}[ count(betterDepartments) > 0 ]
+# sanity.io/docs/groq-joins#10.1
+*[ _type == "employee" ]{
+  ...,
+  "betterDepartments": *[
+    _type == "department"
+    && baseSalary > ^.salary
+    && manager != ^.boss
+    && city == ^.city
+  ],
+}[ count(betterDepartments) > 0 ]
+# sanity.io/docs/groq-joins#11.1
+*[ _type == "employee" && department->_id == "finance" ]
+# sanity.io/docs/groq-joins#12.1
+*[ _type == "employee" && count(*[ _type == "department" && ^._id in employees[]._ref ]) > 0 ]
+# sanity.io/docs/groq-joins#13.1
+*[ _type == "employee" && !defined(department->) ]
+# sanity.io/docs/groq-joins#14.1
+*[ _type == "employee" && count(*[ _type == "department" && ^._id in employees[]._ref ]) == 0 ]
+# sanity.io/docs/groq-joins#15.1
+*[ _type == "department" ]{
+  ...,
+  "employees": *[ _type == "employee" && references(^._id) ],
+}[ count(employees) > 0 ]
+# sanity.io/docs/groq-joins#16.1
+*[ _type == "employee" ]{
+  ...,
+  "betterPaid": *[ _type == "employee" && salary > ^.salary ],
+}
+# sanity.io/docs/groq-joins#17.1
+*[ _type == "employee" ]{ ..., "self": *[ _id == ^._id ][0] }
+# sanity.io/docs/groq-joins#18.1
+*[ _type == "employee" ]{..., "allDepartments": *[ _type == "department" ]}
+# sanity.io/docs/groq-operators#1.1
+true && true   // returns true
+# sanity.io/docs/groq-operators#1.2
+true && false  // returns false
+# sanity.io/docs/groq-operators#1.3
+false && true  // returns false
+# sanity.io/docs/groq-operators#1.4
+false && false // returns false
+# sanity.io/docs/groq-operators#1.5
+true && null   // returns null
+# sanity.io/docs/groq-operators#1.6
+false && null  // returns false
+# sanity.io/docs/groq-operators#1.7
+null && true   // returns null
+# sanity.io/docs/groq-operators#1.8
+null && false  // returns false
+# sanity.io/docs/groq-operators#1.9
+null && null   // returns null
+# sanity.io/docs/groq-operators#2.1
+// Checks if a document: 
+// is of _type "author"
+// AND has a name value of "John Doe"
+// If both are true, returns all documents matching
+*[_type == "author" && name == "John Doe"]
+# sanity.io/docs/groq-operators#2.2
+// Checks if a document:
+// is of _type "movie"
+// AND has a title of "Arrival"
+// If both are true, returns all documents matching
+*[_type == "movie" && title == "Arrival"]
+# sanity.io/docs/groq-operators#2.3
+// Checks if a document:
+// is of _type "movie"
+// AND includes the string 'sci-fi' in its genres field
+// If both are true, returns all documents matching
+*[_type == "movie" && "sci-fi" in genres]
+# sanity.io/docs/groq-operators#3.1
+true || true   // Returns true
+# sanity.io/docs/groq-operators#3.2
+true || false  // Returns true
+# sanity.io/docs/groq-operators#3.3
+false || true  // Returns true
+# sanity.io/docs/groq-operators#3.4
+false || false // Returns false
+# sanity.io/docs/groq-operators#3.5
+true || null   // Returns true
+# sanity.io/docs/groq-operators#3.6
+false || null  // Returns null
+# sanity.io/docs/groq-operators#3.7
+null || true   // Returns true
+# sanity.io/docs/groq-operators#3.8
+null || false  // Returns null
+# sanity.io/docs/groq-operators#3.9
+null || null   // Returns null
+# sanity.io/docs/groq-operators#4.1
+// Checks if a document:
+// has a number property `popularity` greater than 15
+// OR has a releaseDate after 2016-04-25
+// Returns all documents that match EITHER condition
+*[popularity > 15 || releaseDate > "2016-04-25"]
+# sanity.io/docs/groq-operators#4.2
+// Checks if a document:
+// has a postCount greater than 20
+// OR has a boolean property `featured` equal to true
+// Returns all documents that match EITHER condition
+*[postCount > 20 || featured]
+# sanity.io/docs/groq-operators#4.3
+// Checks if a document:
+// has a name value of "John Doe"
+// OR has a slug.current property containing the word "forever"
+// Returns all documents that match EITHER condition
+*[name == "John Doe" || slug.current match "forever"]
+# sanity.io/docs/groq-operators#5.1
+!true  // Returns false
+# sanity.io/docs/groq-operators#5.2
+!false // Returns true
+# sanity.io/docs/groq-operators#5.3
+!null  // Returns null
+# sanity.io/docs/groq-operators#6.1
+// Returns all docs that don't start with a.b.
+*[!(_id in path("a.b.**"))]
+# sanity.io/docs/groq-operators#6.2
+// Returns all documents where the boolean `awardWinner` is false
+*[!awardWinner]
+# sanity.io/docs/groq-operators#7.1
+// Returns true if document's _type
+// is included in the array (either "movie" or "person")
+*[_type in ["movie", "person"]]
+# sanity.io/docs/groq-operators#7.2
+// Returns true if "myTag" is in tags array
+*["myTag" in tags]
+# sanity.io/docs/groq-operators#8.1
+// Returns true if document's _type
+// is *not* included in the array (neither "movie" nor "person")
+*[!(_type in ["movie", "person"])]
+# sanity.io/docs/groq-operators#8.2
+// Returns true if "myTag" is in tags array
+*[!("myTag" in tags)]
+# sanity.io/docs/groq-operators#9.1
+// Returns all items in the root array
+*[]
+# sanity.io/docs/groq-operators#9.2
+// Returns all items from the root array
+// matching the filter provided (documents with _type of "movie")
+*[_type == "movie"]
+# sanity.io/docs/groq-operators#10.1
+// @ refers to the root value (document) of the scope
+*[ @["1"] ] 
+# sanity.io/docs/groq-operators#10.2
+// @ refers to the myArray array
+// Returns the total number of items in my Array
+*{"arraySizes": myArray[]{"size": count(@)}}
+# sanity.io/docs/groq-operators#11.1
+// Value of ^ is the current doc in the "someParent" array
+*[_type == "someParent"]{ 
+  "referencedBy": *[ references(^._id) ]
+}
+# sanity.io/docs/groq-operators#11.3
+// person.someObj.parentName returns root name value
+*[_type=="person"]{
+  name,
+  someObj{
+    name,
+    "parentName": ^.name
+  }
+}
+# sanity.io/docs/groq-operators#12.1
+*[_type == "content"]{
+  "children": *[references(^._id)]{
+    "grandchildren": *[references(^._id) && references(^.^._id)]
+  }
+}
+# sanity.io/docs/groq-operators#13.1
+// Returns the name string from someObject
+*[_type == "document"] {
+  "nestedName": someObject.name
+}
+# sanity.io/docs/groq-operators#14.1
+// Returns the illegalIdentifier value from someObject
+*[_type == "document"] {
+  "nestedName": someObject["illegalIdentifier"]
+}
+# sanity.io/docs/groq-operators#15.1
+*[_id == "someDocument"]{
+  referencedDoc->, // Returns all data
+  "referenceName": referencedDoc->name, // Returns the name value
+  "referenceProjection": referencedDoc->{
+    title,
+    description
+  } // Returns the title and description
+}
+# sanity.io/docs/groq-operators#16.1
+// "cast" loops through the castMembers array
+// each person dereferences to return each person's name
+*[_type=='movie']{title,'cast': castMembers[].person->name}
+# sanity.io/docs/groq-operators#16.2
+// Returns
+{
+  title: "Interstellar",
+  cast: [
+    "Matthew McConaughey",
+    "Anne Hathaway",
+    "Matt Damon",
+    ...
+  ]
+}
+# sanity.io/docs/groq-operators#17.1
+// In an array
+[ ...[1,2], 3, ...[4,5] ]
+# sanity.io/docs/groq-operators#17.1
+// Returns
+[1,2,3,4,5]
+# sanity.io/docs/groq-operators#17.2
+// In an object
+{ ...{"a": 1}, "b":2, ...{"c":3} }
+//returns
+{ "a": 1, "b": 2, "c":3 }
+# sanity.io/docs/groq-operators#18.1
+// title contains a word starting with "wo"
+*[title match "wo*"] 
+# sanity.io/docs/groq-operators#18.2
+// title and body combined contains a word starting with "wo" and the full word "zero"
+*[[title, body] match ["wo*", "zero"]]
+# sanity.io/docs/groq-operators#18.3
+// title must contain both the full words "hello" and "goodbye"
+*[title match ["hello", "goodbye"]]
+# sanity.io/docs/groq-operators#19.1
+// Find documents where slug starts with a prefix
+*[string::startsWith(slug.current, "my-pretty")]
+# sanity.io/docs/groq-operators#19.2
+// Compare version numbers as exact strings
+*[version == "1.2.3"]
+# sanity.io/docs/groq-operators#19.3
+// Split and compare parts of structured strings
+*[count(string::split(version, ".")) == 3]
+# sanity.io/docs/groq-operators#20.1
+// Left-hand expression | Right-hand function
+* | order(_id asc)
+# sanity.io/docs/groq-operators#20.1
+*[_type == "post"] | order(date desc)
+# sanity.io/docs/groq-operators#20.1
+*[]{ _id, title } | order(_createdAt asc)
+# sanity.io/docs/groq-pipeline-components#1.1
+*[ _type == "movie" && releaseYear >= 1980]{
+  title,
+  releaseYear,
+  genre
+} | order(releaseYear desc, title asc)
+# sanity.io/docs/groq-pipeline-components#2.1
+*[ _type == "movie" && releaseYear >= 1980]
+# sanity.io/docs/groq-pipeline-components#3.1
+*[ _type == "book" ]{
+  title,
+  "authors": authors[]{
+    "name": firstName + " " + lastName,
+    birthYear,
+  }
+}
+# sanity.io/docs/groq-pipeline-components#4.1
+{
+  name,
+  role == "director" => {
+    "movies": *[ _type == "movie" && director._ref == ^._id ]
+  }
+}
+# sanity.io/docs/groq-syntax#2.1
+*[ _type == "director" && birthYear >= 1970 ]{
+  name,
+  birthYear,
+  "movies": *[ _type == "movie" && director._ref == ^._id ]
+}
+# sanity.io/docs/groq-syntax#3.1
+{
+  // Comments can be on a separate line
+  "key": "value" // Or at the end of a line
+}
+# sanity.io/docs/groq-syntax#4.1
+3.0
+# sanity.io/docs/groq-syntax#4.1
+3.14
+# sanity.io/docs/groq-syntax#4.1
+3e6      // Equivalent to 3000000.0
+# sanity.io/docs/groq-syntax#4.1
+3.14e0  // Equivalent to 3.14
+# sanity.io/docs/groq-syntax#4.1
+3.14e-2  // Equivalent to 0.0314
+# sanity.io/docs/groq-syntax#5.1
+*[ category == "news" ]
+# sanity.io/docs/groq-syntax#6.1
+// @ refers to the current number being evaluated
+// Returns numbers in the array if they're greater than or equal to 10
+numbers[ @ >= 10 ]
+# sanity.io/docs/groq-syntax#6.2
+// @ refers to the current document
+// Returns the number of items in each document's myArray array
+*{"arraySize": count(@.myArray)}
+# sanity.io/docs/groq-syntax#7.1
+*[ _type == "movie" && releaseYear >= 2000 ]{
+  title,
+  releaseYear,
+  crew{name, title},
+  "related": *[ _type == "movie" && genre == ^.genre ]
+}
+# sanity.io/docs/how-queries-work#1.1
+*[_type == 'movie' && releaseYear >= 1979]
+# sanity.io/docs/how-queries-work#2.1
+*[_type == 'movie' && releaseYear >= 1979]{ _id, title, releaseYear }
+# sanity.io/docs/how-queries-work#3.1
+*[_type == 'movie' && releaseYear >= 1979] | order(releaseYear) {
+  _id, title, releaseYear 
+}
+# sanity.io/docs/how-queries-work#4.1
+*[_type == 'movie' && releaseYear >= 1979] | order(releaseYear) {
+  _id, title, releaseYear
+}[0...100]
+# sanity.io/docs/how-queries-work#5.1
+*[_type == 'movie' && releaseYear >= 1979]{
+  _id, title, releaseYear
+}
+# sanity.io/docs/how-queries-work#6.1
+*[_type == 'movie' && releaseYear >= 1979]{
+  _id, title, releaseYear,
+  director
+}
+# sanity.io/docs/how-queries-work#7.1
+*[_type == 'movie' && releaseYear >= 1979]{
+  _id, title, releaseYear,
+  director->
+}
+# sanity.io/docs/how-queries-work#8.1
+*[_type == 'movie' && releaseYear >= 1979]{
+  _id, title, releaseYear,
+  director->{name}
+}
+# sanity.io/docs/how-queries-work#9.1
+*[_type == 'movie' && releaseYear >= 1979]{
+  _id, title, releaseYear,
+  "directorName": director->name
+}
+# sanity.io/docs/how-queries-work#10.1
+*[_type == 'movie' && releaseYear >= 1979]{
+  _id, title, releaseYear, director,
+  producers[]
+}
+# sanity.io/docs/how-queries-work#11.1
+*[_type == 'movie' && releaseYear >= 1979]{
+  _id, title, releaseYear, director,
+  producers[]->
+}
+# sanity.io/docs/how-queries-work#12.1
+*[_type == 'movie' && references('ridley-scott')]
+# sanity.io/docs/how-queries-work#13.1
+*[_type == "person"]{
+  _id, name,
+  "movies": *[_type == "movie" && references(^._id)].title
+}
+# sanity.io/docs/how-queries-work#14.1
+*[_type == "movie" && references(^._id)]{title}
+# sanity.io/docs/how-queries-work#15.1
+*[_type == "movie" && references(^._id)].title
+# sanity.io/docs/how-queries-work#16.1
+*[_type == "project"]{
+  _id, title,
+  "status": milestones|order(year desc)[0].status
+}
+# sanity.io/docs/how-queries-work#17.1
+*[_type == "project"]{
+  _id, title,
+  "completed": count(milestones[status == 'completed']) > 0
+}
+# sanity.io/docs/how-queries-work#18.1
+*[_type == "project"]{
+  _id, title,
+  "status": milestones | order(year desc)[0].status
+}
+# sanity.io/docs/how-queries-work#19.1
+*[_type == "movie"]{
+  title,
+  "posterImage": poster.asset->url
+}
+# sanity.io/docs/how-queries-work#20.1
+*[_type == "movie"]{
+  title,
+  "imageUrls": images[].asset->url
+}
+# sanity.io/docs/how-queries-work#21.1
+*[_type == "movie"]{
+  title,
+  "images": images[]{
+    caption,
+    "url": asset->url,
+  }
+}
+# sanity.io/docs/how-queries-work#22.1
+*[_type == "movie"]{
+  "actorCount": count(actors)
+}
+# sanity.io/docs/how-queries-work#23.1
+*[_type == "movie"]{
+  "actorCount": count(actors),
+  ...
+}
+# sanity.io/docs/how-queries-work#24.1
+// GROQ API v1
+*[]{
+  ...,
+  'age': 45 // This will override the age property
+            // returned from the ellipsis, so age == 45
+}
+# sanity.io/docs/how-queries-work#24.2
+*[]{
+  'age': 45,
+  ... // The age value returned from the ellipsis does *not*
+      // override the explicitly set value, so age == 45
+}
+# sanity.io/docs/how-queries-work#25.1
+// GROQ API v2021-03-25 or later
+*[]{
+  ...,
+  'age': 45 // This will override the age property
+            // returned from the ellipsis, so age == 45
+}
+# sanity.io/docs/how-queries-work#25.2
+*[]{
+  'age': 45,
+  ... // The age value returned from the ellipsis *does*
+      // override the explicitly set value, so age == 23
+}
+# sanity.io/docs/how-queries-work#26.1
+count(*)
+# sanity.io/docs/how-queries-work#27.1
+count(*[name match "sigourney"]) > 0
+# sanity.io/docs/how-queries-work#28.1
+{
+  "mainStory": *[_id == "story-1234"],
+  "campaign": *[_id == "campaign-1234"],
+  "topStories": *[_type == "story"] | order(publishAt desc) [0..10]
+}
+# sanity.io/docs/query-cheat-sheet#1.1
+* // Everything, i.e. all documents
+# sanity.io/docs/query-cheat-sheet#1.1
+*[] // Everything with no filters applied, i.e. all documents
+# sanity.io/docs/query-cheat-sheet#1.1
+*[_type == "movie"] // All movie documents
+# sanity.io/docs/query-cheat-sheet#1.1
+*[_id == "abc.123"] // _id equals
+# sanity.io/docs/query-cheat-sheet#1.1
+*[_type in ["movie", "person"]] // _type is movie or person
+# sanity.io/docs/query-cheat-sheet#1.1
+*[_type == "movie" && popularity > 15 && releaseDate > "2016-04-25"] // multiple filters AND
+# sanity.io/docs/query-cheat-sheet#1.1
+*[_type == "movie" && (popularity > 15 || releaseDate > "2016-04-25")] // multiple filters OR
+# sanity.io/docs/query-cheat-sheet#1.1
+*[popularity < 15] // less than
+# sanity.io/docs/query-cheat-sheet#1.1
+*[popularity > 15] // greater than
+# sanity.io/docs/query-cheat-sheet#1.1
+*[popularity <= 15] // less than or equal
+# sanity.io/docs/query-cheat-sheet#1.1
+*[popularity >= 15] // greater than or equal
+# sanity.io/docs/query-cheat-sheet#1.1
+*[popularity == 15]
+# sanity.io/docs/query-cheat-sheet#1.1
+*[releaseDate != "2016-04-27"] // not equal
+# sanity.io/docs/query-cheat-sheet#1.1
+*[!(releaseDate == "2016-04-27")] // not equal
+# sanity.io/docs/query-cheat-sheet#1.1
+*[!(releaseDate != "2016-04-27")] // even equal via double negatives "not not equal"
+# sanity.io/docs/query-cheat-sheet#1.1
+*[dateTime(_updatedAt) > dateTime('2018-04-20T20:43:31Z')] // Use zulu-time when comparing datetimes to strings
+# sanity.io/docs/query-cheat-sheet#1.1
+*[dateTime(_updatedAt) > dateTime(now()) - 60*60*24*7] // Updated within the past week
+# sanity.io/docs/query-cheat-sheet#1.1
+*[name < "Baker"] // Records whose name precedes "Baker" alphabetically
+# sanity.io/docs/query-cheat-sheet#1.1
+*[awardWinner == true] // match boolean
+# sanity.io/docs/query-cheat-sheet#1.1
+*[awardWinner] // true if awardWinner == true
+# sanity.io/docs/query-cheat-sheet#1.1
+*[!awardWinner] // true if awardWinner == false
+# sanity.io/docs/query-cheat-sheet#1.1
+*[defined(awardWinner)] // has been assigned an award winner status (any kind of value)
+# sanity.io/docs/query-cheat-sheet#1.1
+*[!defined(awardWinner)] // has not been assigned an award winner status (any kind of value)
+# sanity.io/docs/query-cheat-sheet#1.1
+*[title == "Aliens"]
+# sanity.io/docs/query-cheat-sheet#1.1
+*[title in ["Aliens", "Interstellar", "Passengers"]]
+# sanity.io/docs/query-cheat-sheet#1.1
+*[_id in path("a.b.c.*")] // _id matches a.b.c.d but not a.b.c.d.e
+# sanity.io/docs/query-cheat-sheet#1.1
+*[_id in path("a.b.c.**")] // _id matches a.b.c.d, and also a.b.c.d.e.f.g, but not a.b.x.1
+# sanity.io/docs/query-cheat-sheet#1.1
+*[!(_id in path("a.b.c.**"))] // _id matches anything that is not under the a.b.c path or deeper
+# sanity.io/docs/query-cheat-sheet#1.1
+*["yolo" in tags] // documents that have the string "yolo" in the array "tags"
+# sanity.io/docs/query-cheat-sheet#1.1
+*[status in ["completed", "archived"]] // the string field status is either == "completed" or "archived"
+# sanity.io/docs/query-cheat-sheet#1.1
+*["person_sigourney-weaver" in castMembers[].person._ref] // Any document having a castMember referencing sigourney as its person
+# sanity.io/docs/query-cheat-sheet#1.1
+*[slug.current == "some-slug"] // nested properties
+# sanity.io/docs/query-cheat-sheet#1.1
+*[count((categories[]->slug.current)[@ in ["action", "thriller"]]) > 0] // documents that reference categories with slugs of "action" or "thriller"
+# sanity.io/docs/query-cheat-sheet#1.1
+*[count((categories[]->slug.current)[@ in ["action", "thriller"]]) == 2] // documents that reference categories with slugs of "action" and "thriller". set == 2 based on the total number of items in the array
+# sanity.io/docs/query-cheat-sheet#1.1
+*[sanity::dataset() == 'production'] // compare dataset where query is run. Useful in webhooks or functions
+# sanity.io/docs/query-cheat-sheet#1.1
+*[sanity::dataset() in ['prod', 'staging', 'next']] // compare dataset name with list
+# sanity.io/docs/query-cheat-sheet#1.1
+*[string::startsWith(sanity::dataset(), 'prod_')] // check for prefixed dataset names, such as prod_marketing, prod_cs, etc.
+# sanity.io/docs/query-cheat-sheet#1.1
+*[_type == "movie" && genre == user::attributes().genre] // All movie documents that have a genre that matches the genre attribute on the current user (premium feature)
+# sanity.io/docs/query-cheat-sheet#2.1
+// Text contains the word "word"
+*[text match "word"]
+# sanity.io/docs/query-cheat-sheet#2.2
+// Title contains a word starting with "wo"
+*[title match "wo*"] 
+# sanity.io/docs/query-cheat-sheet#2.3
+// Inverse of the previous query; animal matches the start of the word "caterpillar" (perhaps animal == "cat")
+*["caterpillar" match animal + "*"] 
+# sanity.io/docs/query-cheat-sheet#2.4
+// Title and body combined contains a word starting with "wo" and the full word "zero"
+*[[title, body] match ["wo*", "zero"]] 
+# sanity.io/docs/query-cheat-sheet#2.5
+// Are there aliens in my rich text?
+*[body[].children[].text match "aliens"] 
+# sanity.io/docs/query-cheat-sheet#2.6
+// Note how match operates on tokens!
+"foo bar" match "fo*"  // -> true
+# sanity.io/docs/query-cheat-sheet#2.6
+"my-pretty-pony-123.jpg" match "my*.jpg"  // -> false
+# sanity.io/docs/query-cheat-sheet#3.1
+*[_type == "movie"][0] // a single movie (an object is returned, not an array)
+# sanity.io/docs/query-cheat-sheet#3.1
+*[_type == "movie"][0..5] // first 6 movies (inclusive)
+# sanity.io/docs/query-cheat-sheet#3.1
+*[_type == "movie"][0...5] // first 5 movies (non-inclusive)
+# sanity.io/docs/query-cheat-sheet#3.1
+*[_type == "movie"]{title}[0...10] // first 10 movie titles
+# sanity.io/docs/query-cheat-sheet#3.1
+*[_type == "movie"][0...10]{title} // first 10 movie titles
+# sanity.io/docs/query-cheat-sheet#3.1
+*[_type == "movie"][10...20]{title} // first 10 movie titles, offset by 10
+# sanity.io/docs/query-cheat-sheet#3.1
+*[_type == "movie"] // no slice specified --> all movies are returned
+# sanity.io/docs/query-cheat-sheet#4.1
+// order results
+*[_type == "movie"] | order(_createdAt asc)
+# sanity.io/docs/query-cheat-sheet#4.2
+// order results by multiple attributes
+*[_type == "movie"] | order(releaseDate desc) | order(_createdAt asc)
+# sanity.io/docs/query-cheat-sheet#4.3
+// order todo items by descending priority,
+// where priority is equal, list most recently updated
+// item first
+*[_type == "todo"] | order(priority desc, _updatedAt desc) 
+# sanity.io/docs/query-cheat-sheet#4.4
+// the single, oldest document
+*[_type == "movie"] | order(_createdAt asc)[0]
+# sanity.io/docs/query-cheat-sheet#4.5
+// the single, newest document
+*[_type == "movie"] | order(_createdAt desc)[0]
+# sanity.io/docs/query-cheat-sheet#4.6
+// oldest 10 documents
+*[_type == "movie"] | order(_createdAt asc)[0..9]
+# sanity.io/docs/query-cheat-sheet#4.7
+// BEWARE! This selects 10 documents using the default
+// ordering, and *only the selection* is ordered by
+// _createdAt in ascending order
+*[_type == "movie"][0..9] | order(_createdAt asc)
+# sanity.io/docs/query-cheat-sheet#4.8
+// order results alphabetically by a string field
+// This is case sensitive, so A-Z come before a-z
+*[_type == "movie"] | order(title asc)
+# sanity.io/docs/query-cheat-sheet#4.9
+// order results alphabetically by a string field,
+// ignoring case
+*[_type == "movie"] | order(lower(title) asc)
+# sanity.io/docs/query-cheat-sheet#5.1
+// Fetch movies with title, and join with poster asset with path + url
+*[_type=='movie']{title,poster{asset->{path,url}}}
+# sanity.io/docs/query-cheat-sheet#5.2
+// Say castMembers is an array containing objects with character name and a reference to the person:
+// We want to fetch movie with title and an attribute named "cast" which is an array of actor names
+*[_type=='movie']{title,'cast': castMembers[].person->name}
+# sanity.io/docs/query-cheat-sheet#5.3
+// Same query as above, except "cast" now contains objects with person._id and person.name
+*[_type=='movie']{title,'cast': castMembers[].person->{_id, name}}
+# sanity.io/docs/query-cheat-sheet#5.5
+// Books by author.name (book.author is a reference)
+*[_type == "book" && author._ref in *[_type=="author" && name=="John Doe"]._id ]{...}
+# sanity.io/docs/query-cheat-sheet#6.1
+// Create your own objects
+// https://groq.dev/lcGV0Km6dpvYovREqq1gLS
+{
+  // People ordered by Nobel prize year
+  "peopleByPrizeYear": *[]|order(prizes[0].year desc){
+  	"name": firstname + " " + surname,
+    "orderYear": prizes[0].year,
+    prizes
+  },
+  // List of all prizes ordered by year awarded
+  "allPrizes": *[].prizes[]|order(year desc)
+}
+# sanity.io/docs/query-cheat-sheet#6.2
+// Get all Nobel prizes from all root person documents
+// https://groq.dev/v8T0DQawC6ihbNUf4cUeeS
+*[].prizes[]
+# sanity.io/docs/query-cheat-sheet#6.3
+array::join(tags, ", ")                    // tags = ["Rust", "Go", null, "GROQ"] => "Rust, Go, <INVALID>, GROQ"
+# sanity.io/docs/query-cheat-sheet#6.3
+array::join(["a", "b", "c"], ".")          // "a.b.c"
+# sanity.io/docs/query-cheat-sheet#6.3
+array::join(year, ".")                     // year = 2024 => null (not an array)
+# sanity.io/docs/query-cheat-sheet#6.3
+array::join(values, 1)                     // values = [10, 20, 30] => null (separator must be a string)
+# sanity.io/docs/query-cheat-sheet#6.3
+array::compact(numbers)                    // numbers = [1, null, 2, null, 3] => [1, 2, 3]
+# sanity.io/docs/query-cheat-sheet#6.3
+array::unique(items)                       // items = [1, 2, 2, 3, 4, 5, 5] => [1, 2, 3, 4, 5]
+# sanity.io/docs/query-cheat-sheet#6.3
+array::unique(records)                     // records = [[1], [1]] => [[1], [1]] (arrays are not comparable)
+# sanity.io/docs/query-cheat-sheet#6.3
+array::intersects(firstList, secondList)   // firstList = [1, 2, 3], secondList = [3, 4, 5] => true
+# sanity.io/docs/query-cheat-sheet#6.3
+array::intersects(tags, keywords)          // tags = ["tech", "science"], keywords = ["art", "design"] => false
+# sanity.io/docs/query-cheat-sheet#7.1
+// return only title
+*[_type == 'movie']{title} 
+# sanity.io/docs/query-cheat-sheet#7.2
+// return values for multiple attributes
+*[_type == 'movie']{_id, _type, title} 
+# sanity.io/docs/query-cheat-sheet#7.3
+// explicitly name the return field for _id
+*[_type == 'movie']{'renamedId': _id, _type, title} 
+# sanity.io/docs/query-cheat-sheet#7.4
+// Return an array of attribute values (no object wrapper)
+*[_type == 'movie'].title
+# sanity.io/docs/query-cheat-sheet#7.4
+*[_type == 'movie']{'characterNames': castMembers[].characterName}
+# sanity.io/docs/query-cheat-sheet#7.5
+// movie titled Arrival and its posterUrl
+*[_type=='movie' && title == 'Arrival']{title,'posterUrl': poster.asset->url} 
+# sanity.io/docs/query-cheat-sheet#7.6
+// Explicitly return all attributes
+*[_type == 'movie']{...} 
+# sanity.io/docs/query-cheat-sheet#7.7
+// Some computed attributes, then also add all attributes of the result
+*[_type == 'movie']{'posterUrl': poster.asset->url, ...} 
+# sanity.io/docs/query-cheat-sheet#7.8
+// Default values when missing or null in document
+*[_type == 'movie']{..., 'rating': coalesce(rating, 'unknown')}
+# sanity.io/docs/query-cheat-sheet#7.9
+// Number of elements in array 'actors' on each movie
+*[_type == 'movie']{"actorCount": count(actors)} 
+# sanity.io/docs/query-cheat-sheet#7.10
+// Apply a projection to every member of an array
+*[_type == 'movie']{castMembers[]{characterName, person}} 
+# sanity.io/docs/query-cheat-sheet#7.11
+// Filter embedded objects
+*[_type == 'movie']{castMembers[characterName match 'Ripley']{characterName, person}} 
+# sanity.io/docs/query-cheat-sheet#7.12
+// Follow every reference in an array of references
+*[_type == 'book']{authors[]->{name, bio}}
+# sanity.io/docs/query-cheat-sheet#7.13
+// Explicity name the outer return field
+{'threeMovieTitles': *[_type=='movie'][0..2].title}
+# sanity.io/docs/query-cheat-sheet#7.14
+// Combining several unrelated queries in one request
+{'featuredMovie': *[_type == 'movie' && title == 'Alien'][0], 'scifiMovies': *[_type == 'movie' && 'sci-fi' in genres]}
+# sanity.io/docs/query-cheat-sheet#8.1
+// *
+*   // Everything, i.e. all documents
+# sanity.io/docs/query-cheat-sheet#8.2
+// @
+*[ @["1"] ] // @ refers to the root value (document) of the scope
+# sanity.io/docs/query-cheat-sheet#8.2
+*[ @[$prop]._ref == $refId ] // Select reference prop from an outside variable.
+# sanity.io/docs/query-cheat-sheet#8.2
+*{"arraySizes": arrays[]{"size": count(@)}} // @ also works for nested scopes
+# sanity.io/docs/query-cheat-sheet#8.3
+// ^
+// ^ refers to the enclosing document. Here ^._id refers to the id
+// of the enclosing person record.
+*[_type=="person"]{
+  name,
+  "relatedMovies": *[_type=='movie' && references(^._id)]{ title }
+}
+# sanity.io/docs/query-cheat-sheet#9.1
+// select() returns the first => pair whose left-hand side evaluates to true
+*[_type=='movie']{..., "popularity": select(
+  popularity > 20 => "high",
+  popularity > 10 => "medium",
+  popularity <= 10 => "low"
+)}
+# sanity.io/docs/query-cheat-sheet#9.2
+// The first select() parameter without => is returned if no previous matches are found
+*[_type=='movie']{..., "popularity": select(
+  popularity > 20 => "high",
+  popularity > 10 => "medium",
+  "low"
+)}
+# sanity.io/docs/query-cheat-sheet#9.3
+// Projections also have syntactic sugar for inline conditionals
+*[_type=='movie']{
+  ...,
+  releaseDate >= '2018-06-01' => {
+    "screenings": *[_type == 'screening' && movie._ref == ^._id],
+    "news": *[_type == 'news' && movie._ref == ^._id],
+  },
+  popularity > 20 && rating > 7.0 => {
+    "featured": true,
+    "awards": *[_type == 'award' && movie._ref == ^._id],
+  },
+}
+# sanity.io/docs/query-cheat-sheet#9.4
+// The above is exactly equivalent to:
+*[_type=='movie']{
+  ...,
+  ...select(releaseDate >= '2018-06-01' => {
+    "screenings": *[_type == 'screening' && movie._ref == ^._id],
+    "news": *[_type == 'news' && movie._ref == ^._id],
+  }),
+  ...select(popularity > 20 && rating > 7.0 => {
+    "featured": true,
+    "awards": *[_type == 'award' && movie._ref == ^._id],
+  }),
+}
+# sanity.io/docs/query-cheat-sheet#9.5
+// Specify sets of projections for different content types in an array
+content[]{
+  _type == 'type1' => {
+    // Your selection of fields for type1
+  },
+  _type == 'type2' => {
+    // Your selection of fields for type2
+    "url": file.asset->url // Use joins to get data of referenced document
+  }
+}
+# sanity.io/docs/query-cheat-sheet#10.1
+'content': content[]{
+  _type == 'reference' => @->,
+  _type != 'reference' => @,
+}
+# sanity.io/docs/query-cheat-sheet#11.1
+// any document that references the document 
+// with id person_sigourney-weaver, 
+// return only title
+*[references("person_sigourney-weaver")]{title}
+# sanity.io/docs/query-cheat-sheet#11.2
+// Movies which reference ancient people
+*[_type=="movie" && references(*[_type=="person" && age > 99]._id)]{title}
+# sanity.io/docs/query-cheat-sheet#11.3
+*[defined(tags)] // any document that has the attribute 'tags'
+# sanity.io/docs/query-cheat-sheet#11.4
+// coalesce takes a number of attribute references
+// and returns the value of the first attribute
+// that is non-null. In this example used to
+// default back to the English language where a
+// Finnish translation does not exist.
+*{"title": coalesce(title.fi, title.en)} 
+# sanity.io/docs/query-cheat-sheet#11.5
+// count counts the number of items in a collection
+count(*[_type == 'movie' && rating == 'R']) // returns number of R-rated movies
+# sanity.io/docs/query-cheat-sheet#11.6
+*[_type == 'movie']{
+  title, 
+  "actorCount": count(actors) // Counts the number of elements in the array actors
+}
+# sanity.io/docs/query-cheat-sheet#11.7
+// round() rounds number to the nearest integer, or the given number of decimals
+round(3.14) // 3
+# sanity.io/docs/query-cheat-sheet#11.7
+round(3.14, 1) // 3.1
+# sanity.io/docs/query-cheat-sheet#11.8
+// score() adds points to the score value depending 
+// on the use of the string "GROQ" in each post's description 
+// The value is then used to order the posts 
+*[_type == "post"] 
+  | score(description match "GROQ") 
+  | order(_score desc) 
+  { _score, title }
+# sanity.io/docs/query-cheat-sheet#11.9
+// boost() adds a defined boost integer to scores of items matching a condition 
+// Adds 1 to the score for each time $term is matched in the title field
+// Adds 3 to the score if (movie > 3) is true
+*[_type == "movie" && movieRating > 3] | 
+  score(
+    title match $term,
+    boost(movieRating > 8, 3)
+  )
+# sanity.io/docs/query-cheat-sheet#11.10
+// Creates a scoring system where $term matching in the title
+// is worth more than matching in the body
+*[_type == "movie" && movieRating > 3] | score(
+  boost(title match $term, 4),
+  boost(body match $term, 1)
+)
+# sanity.io/docs/query-cheat-sheet#11.12
+// text::semanticSimilarity() ranks results by semantic meaning
+// Requires dataset embeddings to be enabled
+// Only valid inside score()
+*[_type == "product"]
+  | score(text::semanticSimilarity("leather waterproof boots"))
+  | order(_score desc)
+  { _score, title }
+# sanity.io/docs/query-cheat-sheet#11.13
+// Hybrid search: combine keyword matching with semantic scoring
+*[_type == "product"]
+  | score(
+      @ match text::query("waterproof boots"),
+      text::semanticSimilarity("waterproof boots")
+    )
+  | order(_score desc)
+# sanity.io/docs/query-cheat-sheet#11.14
+// Get all versions and drafts of a document. Use with the raw perspective or a perspective stack to ensure accurate results.
+*[sanity::versionOf('document-id')]
+# sanity.io/docs/query-cheat-sheet#11.15
+// Get all documents that are part of a release. Use with the raw perspective to ensure accurate results.
+*[sanity::partOfRelease('release-id')]
+# sanity.io/docs/query-cheat-sheet#12.1
+// Returns all documents that are storefronts
+// within 10 miles of the user-provided currentLocation parameter
+*[
+  _type == 'storefront' &&
+  geo::distance(geoPoint, $currentLocation) < 16093.4
+]
+# sanity.io/docs/query-cheat-sheet#12.3
+// Creates a "marathonRoutes" array that contains
+// all marathons whose routes intersect with the current neighborhood
+*[_type == "neighborhood"] {
+  "marathonRoutes": *[_type == "marathon" && 
+                      geo::intersects(^.neighborhoodRegion, routeLine)  
+                    ]
+}
+# sanity.io/docs/query-cheat-sheet#13.1
+// Standard arithmetic operations are supported
+1 + 2  // 3 (addition)
+# sanity.io/docs/query-cheat-sheet#13.1
+3 - 2  // 1 (subtraction)
+# sanity.io/docs/query-cheat-sheet#13.1
+2 * 3  // 6 (multiplication)
+# sanity.io/docs/query-cheat-sheet#13.1
+8 / 4  // 2 (division)
+# sanity.io/docs/query-cheat-sheet#13.1
+2 ** 4 // 16 (exponentiation)
+# sanity.io/docs/query-cheat-sheet#13.1
+8 % 3  // 2 (modulo)
+# sanity.io/docs/query-cheat-sheet#13.2
+// Exponentiation can be used to take square- and cube-roots too
+9 ** (1/2)  // 3 (square root)
+# sanity.io/docs/query-cheat-sheet#13.2
+27 ** (1/3) // 3 (cube root)
+# sanity.io/docs/query-cheat-sheet#13.3
+// + can also concatenate strings, arrays, and objects:
+"abc" + "def" // "abcdef"
+# sanity.io/docs/query-cheat-sheet#13.3
+[1,2] + [3,4] // [1,2,3,4]
+# sanity.io/docs/query-cheat-sheet#13.3
+{"a":1,"b":2} + {"c":3} // {"a":1,"b":2,"c":3}
+# sanity.io/docs/query-cheat-sheet#13.4
+// Concatenation of a string and a number requires the number be
+// converted to a string. Otherwise, the operation returns null
+3 + " p.m."         // null
+# sanity.io/docs/query-cheat-sheet#13.4
+string(3) + " p.m." // "3 p.m."
+# sanity.io/docs/search-content-with-groq#1.1
+// Search articles using both keyword and semantic relevance,
+// with extra weight for editorial quality and recency.
+*[_type == "article"]    // 1. Filter: articles only
+# sanity.io/docs/search-content-with-groq#1.3
+      // 4. Recency boost: articles from the last 30 days score 1.5x higher.
+      boost(_updatedAt > now() - 60*60*24*30, 1.5)
+# sanity.io/docs/search-content-with-groq#1.3
+  [0...$pageSize]                         // 6. Paginate
+# sanity.io/docs/search-content-with-groq#2.1
+*[_type == "article" && title match "summer dresses"]
+# sanity.io/docs/search-content-with-groq#3.1
+*[_type == "article" && (title match "summer" || body match "summer")]
+# sanity.io/docs/search-content-with-groq#4.1
+*[_type == "article" && tags[] match "fashion"]
+# sanity.io/docs/search-content-with-groq#5.1
+*[_type == "article" && pt::text(body) match "summer collection"]
+# sanity.io/docs/search-content-with-groq#7.1
+*[_type == "article" && title match text::query('"summer collection" -discontinued')]
+# sanity.io/docs/search-content-with-groq#8.1
+*[_type == "article"] | score([title] match text::query("summer fashion trends"))
+# sanity.io/docs/search-content-with-groq#9.1
+// Single attribute
+*[_type == "article" && title match text::query("summer")]
+# sanity.io/docs/search-content-with-groq#9.2
+// Array of attributes — searches both title and body
+*[_type == "article" && [title, body] match text::query("summer")]
+# sanity.io/docs/search-content-with-groq#9.3
+// Nested object — searches every string field under "details"
+*[_type == "article" && details match text::query("summer")]
+# sanity.io/docs/search-content-with-groq#9.4
+// Entire document — searches every string field
+*[_type == "article" && @ match text::query("summer")]
+# sanity.io/docs/search-content-with-groq#10.1
+*[_type == "article"] | score([title] match text::query('"summer dress collection"'))
+# sanity.io/docs/search-content-with-groq#11.1
+*[] | score([title] match text::query('"exact phrase" -excluded'))
+# sanity.io/docs/search-content-with-groq#12.1
+// Documents matching "summer" OR "fashion" (or both)
+*[] | score([title] match text::query("summer fashion"))
+# sanity.io/docs/search-content-with-groq#13.1
+// Documents about "summer" but NOT containing "winter"
+*[] | score([title] match text::query("summer -winter"))
+# sanity.io/docs/search-content-with-groq#14.1
+// Documents about "dresses" but not "winter collection"
+*[] | score([title] match text::query('dresses -"winter collection"'))
+# sanity.io/docs/search-content-with-groq#15.1
+// Find "summer fashion" excluding "winter" and "sale"
+*[] | score([title] match text::query('summer fashion -winter -sale'))
+# sanity.io/docs/search-content-with-groq#15.2
+// Find exact phrase, exclude a term
+*[] | score([title] match text::query('"summer collection" -discontinued'))
+# sanity.io/docs/search-content-with-groq#15.3
+// Prefix search excluding a term
+*[] | score([title] match text::query('fash* -"fast fashion"'))
+# sanity.io/docs/search-content-with-groq#16.1
+// Matches "fashion", "fashionable", "fashionista"
+*[] | score([title] match text::query("fash*"))
+# sanity.io/docs/search-content-with-groq#17.1
+// Matches "summer dress", "summer dresses", "summer dressing"
+*[] | score([title] match text::query('"summer dress*"'))
+# sanity.io/docs/search-content-with-groq#18.1
+// Matches "underdressed", "overdressed", etc.
+*[] | score([title] match text::query("*dressed"))
+# sanity.io/docs/search-content-with-groq#19.1
+*[_type == "article" && title match "fash*"]
+# sanity.io/docs/search-content-with-groq#20.1
+{
+  "caseIsFolded":       "CONFIGURA" match "configura",              // true
+  "accentInContent":    "configurá" match "configura",              // false
+  "accentInSearchTerm": "configura" match "configurá",              // false
+  "sameWithTextQuery":  "configurá" match text::query("configura")  // false
+}
+# sanity.io/docs/search-content-with-groq#21.1
+{
+  "codepointOrder":     ["Zebra", "apple", "banana", "Ápple", "Émile", "árbol"] | order(@),
+  "lowerOnlyFixesCase": ["Zebra", "apple", "banana", "Ápple", "Émile", "árbol"] | order(string::lower(@))
+}
+# sanity.io/docs/search-content-with-groq#22.1
+*[_type == "product" && searchKey match $term] | order(searchKey) [0...20]{
+  _id,
+  title
+}
+# sanity.io/docs/search-content-with-groq#23.1
+*[_type == "article"] | score(text::semanticSimilarity("comfortable clothes for hot weather"))
+# sanity.io/docs/search-content-with-groq#24.1
+*[_type == "article"] | score([title] match text::query("summer fashion")) | order(_score desc)
+# sanity.io/docs/search-content-with-groq#25.1
+// Good: filter first, then score
+*[_type == "article" && category == "fashion"] | score([title] match text::query("summer"))
+# sanity.io/docs/search-content-with-groq#25.2
+// Less efficient: scoring everything
+*[_type == "article"] | score([title] match text::query("summer"), boost(category == "fashion", 5))
+# sanity.io/docs/search-content-with-groq#26.1
+*[_type == "article" && publishedAt > "2024-01-01"]
+  | score([title] match text::query("summer fashion"))
+  | order(_score desc)
+  [0...10]
+# sanity.io/docs/search-content-with-groq#27.1
+*[_type == "article"] | score(
+  text::query("summer fashion"),
+  boost(category == "featured", 2)
+) | order(_score desc)
+# sanity.io/docs/search-content-with-groq#28.1
+*[_type == "article"] | score([title] match text::query("summer fashion")) {
+  title,
+  _score,
+  "relevance": _score
+} | order(_score desc)
+# sanity.io/docs/search-content-with-groq#29.1
+boost(expression, weight)
+# sanity.io/docs/search-content-with-groq#30.1
+*[_type == "article"] | score(
+  text::query("summer fashion"),
+  boost(category == "editorial", 3),
+  boost(featured == true, 5)
+) | order(_score desc)
+# sanity.io/docs/search-content-with-groq#31.1
+*[_type == "article"] | score(
+  boost(title match "summer fashion", 3),
+  boost(body match "summer fashion", 1)
+) | order(_score desc)
+# sanity.io/docs/search-content-with-groq#32.1
+*[_type == "article"] | score(
+  text::query("summer fashion"),
+  boost(publishedAt > "2024-06-01", 2)
+) | order(_score desc)
+# sanity.io/docs/search-content-with-groq#33.1
+*[_type == "article"] | score(
+  [title] match text::query("summer fashion trends"),
+  text::semanticSimilarity("summer fashion trends")
+) | order(_score desc)
+# sanity.io/docs/search-content-with-groq#34.1
+*[_type == "article"] | score(
+  boost([title] match text::query("summer fashion"), 2),
+  boost(text::semanticSimilarity("summer fashion"), 1)
+) | order(_score desc)
+# sanity.io/docs/search-content-with-groq#35.1
+*[_type == "article" && !(_id in path("drafts.**"))] | score(
+  boost([title] match text::query("summer fashion"), 2),
+  boost(text::semanticSimilarity("comfortable warm weather clothing"), 1),
+  boost(category == "editorial", 1.5),
+  boost(publishedAt > "2024-01-01", 1.2)
+) | order(_score desc) [0...20] {
+  title,
+  slug,
+  excerpt,
+  _score,
+  "highlights": text::highlight()
+}

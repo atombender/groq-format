@@ -1,0 +1,1 @@
+*[_type == "post"]{"tags": array::unique(tags[]->title), "tagList": array::join(tags[]->title, ", "), "hasOverlap": array::intersects(tags[]._ref, $tagIds), "compact": array::compact(authors[]->name)}

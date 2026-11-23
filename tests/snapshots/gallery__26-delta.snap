@@ -1,0 +1,35 @@
+---
+source: tests/gallery.rs
+expression: snapshot
+---
+--- width 40
+*[
+  _type == "post"
+  && delta::changedAny(
+    (title, slug, body)
+  )
+] {
+  "before": before().title,
+  "after": after().title,
+  "operation": delta::operation()
+}
+--- width 60
+*[
+  _type == "post" && delta::changedAny((title, slug, body))
+] {
+  "before": before().title,
+  "after": after().title,
+  "operation": delta::operation()
+}
+--- width 80
+*[_type == "post" && delta::changedAny((title, slug, body))] {
+  "before": before().title,
+  "after": after().title,
+  "operation": delta::operation()
+}
+--- width 120
+*[_type == "post" && delta::changedAny((title, slug, body))] {
+  "before": before().title,
+  "after": after().title,
+  "operation": delta::operation()
+}

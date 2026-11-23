@@ -1,0 +1,28 @@
+# Seeds for failure cases proptest has generated in the past. It is
+# automatically read and these particular cases re-run before any
+# novel cases are generated.
+#
+# It is recommended to check this file in to source control so that
+# everyone who runs the test benefits from these saved cases.
+cc 13f576af4edc3be323aa498c9634db6dfc840a7c298af7d9164804ccfb080f20 # shrinks to q = "fn _type::_type($p) = // \n*&&*;(\"X_LrOW/iW8d7_H U_j-/1 \" | order({} desc, []))", width = 80, force_wrap = false
+cc bf3f7573ce94e256d85605630cd9793032c7ad4efff456ebc7b6f8c29c18a7b5 # shrinks to q = "fn _type::_type($p) =*[0 // \n]==*;*[\"rO_PY9MR2j5_X_j _yEs_a/D: g4ad5_468hzC_cQ_54jwHv_:l _:DMj\"[]]._type // trailing", width = 55, force_wrap = false
+cc 4015a8906b0f11ace28d5ff6a00a7dc390b4ea4c1469773f4f0fb77dfee3def2 # shrinks to q = "*[\"post\" // \n] // trailing", width = 0, force_wrap = false
+cc f129d7925b31959736e19acb26609e0c3c1fa0e5da6d2254c5a2059d05a82eee # shrinks to q = "fn _type::_type($p) =99999999999999999999[\"post\"];*", width = 0, force_wrap = false
+cc b6928ecf0125436eea5e88dbfde9cdb6a09664772ca61007bac9afaa5b70cbfa # shrinks to q = "count([*])==^.^match releaseDate", width = 10, force_wrap = false
+cc 2780986e8186f15ee81c4b51e9d72df17a4ea0d96290b80b9decaef560f962b3 # shrinks to q = "fn _type::_type($p) =!*[*];*", width = 10, force_wrap = false
+cc fb1ff8bf26173dcb1d83758381359a3963da22568f0cc1231b8effdf8a5abd11 # shrinks to q = "* // \n| order(*)", width = 0, force_wrap = false
+cc 25f80ce0d17fb4d0cdad6e22e4f7e4309e2fb5dadc9fe7c182277281d4dee8fb # shrinks to q = "fn _type::_type($p) =* // \n==*| score(*);*", width = 0, force_wrap = true
+cc cf56f5ff14181b1bf05ac77f1fb3ff685021c2c22363aa91ba55895afb53e2d1 # shrinks to q = "*==*==*[true]", width = 0, force_wrap = false
+cc 603d1ffa919dff7d73d1c92f038dba150db5afc93396eccba1a2af1b5ef75277 # shrinks to q = "select(*== // \n* =>count(current,^.^), *)", width = 0, force_wrap = false
+cc 3ef5f045d84cdb8034c7fbebe4972e4a679340f7345aaff623669798b7ffd838 # shrinks to q = "* // \n+0..0{ // \n}", width = 0, force_wrap = false
+cc 3e7ee106c19e70447200cf7ba9e77d3edf2f5271b39865ca615e789bfc5446b6 # shrinks to q = "!@+*==*{ // \n}", width = 0, force_wrap = false
+cc ece1c7f8dd93f3297cee7c76c98b6ae3405b458c879b4d4c72a226af3db6a9bf # shrinks to q = "fn _type::_type($p) =* **+ // \n*;*", width = 0, force_wrap = false
+cc f973ed5e5f912fbe2c466e5a79f078c399fa4c4adb681a1b472a55fe6d487ae6 # shrinks to q = "*[$_type+ // \n0]", width = 0, force_wrap = false
+cc 7dfc37669b2163d193c48b9f8435f09d628c4a54d9a7dec679b5757f37582bb0 # shrinks to q = "fn _type::_type($p) =0..0+*==select(* =>*, releaseDate =>*, *);*", width = 40, force_wrap = false
+cc cd3d8dfa80481469a0b16c4cf315640e837d63567e09e560f1a82538ea73ac29 # shrinks to q = "select(*[ // \n$_type] =>*, *==^.^ =>count(*,*), *)", width = 0, force_wrap = false
+cc d37fbe268b4e3b0d9c4d16cf0f272a3a5085fbac78e435682798c5626ed1a3d5 # shrinks to q = "_typein // \n[] // \n{}&&*", width = 0, force_wrap = false
+cc 01178ad23b7fae8d947b793729bbef5ed7ff723f781dfc838fd8d528b64c1f76 # shrinks to q = "fn _type::_type($p) =*&&_typein1.5[\"post\"];*", width = 0, force_wrap = false
+cc e2bb559ca00059201bd452589b9f78848daa2249aacc77640b7880f69466fa6f # shrinks to q = "*|score(*|boost(*, *)|{current,current[]->{name},_a_00AaAa0aaA0}|order(_score desc)[10...10000]{})", width = 68, force_wrap = false
+cc 822d3d0193651de167bfa8e5a8e99e4558cb74506b0259ef1118f28bf84b770d # shrinks to q = "*|boost($_type, *)|order(current asc)|boost(*, _ref)->[*{\"post\":*,\"post\":aAa0a0__AA000a}]", width = 0, force_wrap = false
+cc 6ad2637666eb57c4457b6081dc9a97616ad2baac5e0612a5f6c07b03b9365103 # shrinks to q = "fn _type::_type($p) =*|{*| order(*)=>*| order(*)==*};*", width = 0, force_wrap = false
+cc 7ad060476ae99411b46412ee98e89eb890198f79d814b9598de11c17d3dcb849 # shrinks to q = "*|score(*|{_type}[0...$_type * 1])[0...0]", width = 13, force_wrap = false

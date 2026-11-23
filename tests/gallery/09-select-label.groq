@@ -1,0 +1,1 @@
+*[_type in ["book", "author", "publisher"]]{_id, _type, "label": select(_type == "book" => title, _type == "author" => name, _type == "publisher" => company.legalName, "Unknown"), "href": select(_type == "book" => "/books/" + slug.current, "/" + _type + "/" + _id)}

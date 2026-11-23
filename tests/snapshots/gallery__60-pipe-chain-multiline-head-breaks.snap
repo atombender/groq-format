@@ -1,0 +1,55 @@
+---
+source: tests/gallery.rs
+expression: snapshot
+---
+--- width 40
+*[
+  _type == $type
+  && nationalDexNumber >= 1
+  && nationalDexNumber <= 151
+  && count(types[
+    lower(@->name) == "water"
+  ]) > 0
+]
+  | score(
+    boost(name match $q, 2),
+    boost(types[]->name match $q, 1),
+    boost(baseStats.attack > 100, 3)
+  )
+  | order(
+    _score desc,
+    baseStats.attack desc
+  ) { name, nationalDexNumber }
+--- width 60
+*[
+  _type == $type
+  && nationalDexNumber >= 1
+  && nationalDexNumber <= 151
+  && count(types[lower(@->name) == "water"]) > 0
+]
+  | score(
+    boost(name match $q, 2),
+    boost(types[]->name match $q, 1),
+    boost(baseStats.attack > 100, 3)
+  )
+  | order(_score desc, baseStats.attack desc) {
+    name,
+    nationalDexNumber
+  }
+--- width 80
+*[
+  _type == $type
+  && nationalDexNumber >= 1
+  && nationalDexNumber <= 151
+  && count(types[lower(@->name) == "water"]) > 0
+]
+  | score(
+    boost(name match $q, 2),
+    boost(types[]->name match $q, 1),
+    boost(baseStats.attack > 100, 3)
+  )
+  | order(_score desc, baseStats.attack desc) { name, nationalDexNumber }
+--- width 120
+*[_type == $type && nationalDexNumber >= 1 && nationalDexNumber <= 151 && count(types[lower(@->name) == "water"]) > 0]
+  | score(boost(name match $q, 2), boost(types[]->name match $q, 1), boost(baseStats.attack > 100, 3))
+  | order(_score desc, baseStats.attack desc) { name, nationalDexNumber }

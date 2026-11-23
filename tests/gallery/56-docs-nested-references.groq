@@ -1,0 +1,4 @@
+*[_type == 'movie' && releaseYear >= 1979]{
+  _id, title, releaseYear,
+  director->{name}
+}

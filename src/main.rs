@@ -30,9 +30,9 @@ struct Cli {
     #[arg(short = 'W', long = "width", default_value_t = DEFAULT_WIDTH)]
     width: usize,
 
-    /// Wrap more aggressively: introduce break points at binary operators,
-    /// filter brackets, parentheses and single-argument function calls so
-    /// long expressions are broken to honor the width limit.
+    /// Wrap more aggressively: break before comparison and arithmetic
+    /// operators as soon as an expression does not fit, and allow breaking
+    /// calls with a single short argument.
     #[arg(long = "force-wrap")]
     force_wrap: bool,
 }

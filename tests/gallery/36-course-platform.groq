@@ -1,0 +1,1 @@
+*[_type == "course" && slug.current == $slug][0]{..., "lessons": lessons[]->{..., "slug": slug[$language].current, "title": title[$language], "completed": count(*[_type == "progress" && lesson._ref == ^._id && user._ref == $userId]) > 0}, "presenters": presenters[]->{name, "title": title[$language], photo}}

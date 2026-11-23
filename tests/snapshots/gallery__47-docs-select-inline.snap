@@ -1,0 +1,37 @@
+---
+source: tests/gallery.rs
+expression: snapshot
+---
+--- width 40
+// The first select() parameter without => is returned if no previous matches are found
+*[_type == "movie"] {
+  ...,
+  "popularity": select(
+    popularity > 20 => "high",
+    popularity > 10 => "medium",
+    "low"
+  )
+}
+--- width 60
+// The first select() parameter without => is returned if no previous matches are found
+*[_type == "movie"] {
+  ...,
+  "popularity": select(
+    popularity > 20 => "high",
+    popularity > 10 => "medium",
+    "low"
+  )
+}
+--- width 80
+// The first select() parameter without => is returned if no previous matches are found
+*[_type == "movie"] {
+  ...,
+  "popularity": select(
+    popularity > 20 => "high",
+    popularity > 10 => "medium",
+    "low"
+  )
+}
+--- width 120
+// The first select() parameter without => is returned if no previous matches are found
+*[_type == "movie"] { ..., "popularity": select(popularity > 20 => "high", popularity > 10 => "medium", "low") }

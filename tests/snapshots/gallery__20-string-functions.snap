@@ -1,0 +1,44 @@
+---
+source: tests/gallery.rs
+expression: snapshot
+---
+--- width 40
+*[
+  _type == "person"
+  && string::startsWith(
+    lower(name),
+    lower($prefix)
+  )
+] {
+  name,
+  "initials": string::split(
+    name,
+    " "
+  )[0],
+  "upper": upper(name),
+  "id": string(_id)
+}
+--- width 60
+*[
+  _type == "person"
+  && string::startsWith(lower(name), lower($prefix))
+] {
+  name,
+  "initials": string::split(name, " ")[0],
+  "upper": upper(name),
+  "id": string(_id)
+}
+--- width 80
+*[_type == "person" && string::startsWith(lower(name), lower($prefix))] {
+  name,
+  "initials": string::split(name, " ")[0],
+  "upper": upper(name),
+  "id": string(_id)
+}
+--- width 120
+*[_type == "person" && string::startsWith(lower(name), lower($prefix))] {
+  name,
+  "initials": string::split(name, " ")[0],
+  "upper": upper(name),
+  "id": string(_id)
+}

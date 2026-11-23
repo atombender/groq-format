@@ -1,0 +1,36 @@
+---
+source: tests/gallery.rs
+expression: snapshot
+---
+--- width 40
+*[_type == "article"]
+  | score(
+    [
+      title
+    ] match text::query("summer fashion")
+  ) {
+    title,
+    _score,
+    "relevance": _score
+  }
+  | order(_score desc)
+--- width 60
+*[_type == "article"]
+  | score([title] match text::query("summer fashion")) {
+    title,
+    _score,
+    "relevance": _score
+  }
+  | order(_score desc)
+--- width 80
+*[_type == "article"]
+  | score([title] match text::query("summer fashion")) {
+    title,
+    _score,
+    "relevance": _score
+  }
+  | order(_score desc)
+--- width 120
+*[_type == "article"]
+  | score([title] match text::query("summer fashion")) { title, _score, "relevance": _score }
+  | order(_score desc)

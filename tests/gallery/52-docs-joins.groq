@@ -1,0 +1,9 @@
+*[ _type in ["employee", "department"]]{
+  ...,
+  _type == "employee" => {
+    department->,
+  },
+  _type == "department" => {
+    "employees": *[ _type == "employee" && department._ref == ^._id ],
+  },
+}

@@ -1,0 +1,1 @@
+*[_type == "page" && language == $lang]{"title": coalesce(title[$lang], title.en, title.no, "Untitled"), "slug": slug.current, "translations": *[_type == "translation.metadata" && references(^._id)].translations[].value->{"slug": slug.current, language}}

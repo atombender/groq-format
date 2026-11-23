@@ -1,0 +1,72 @@
+---
+source: tests/gallery.rs
+expression: snapshot
+---
+--- width 40
+*[
+  _type == "post"
+  && _id != $skip
+  && defined(slug.current)
+]
+  | order(
+    date desc,
+    _updatedAt desc
+  )[0...$limit] {
+    _id,
+    "status": select(
+      _originalId in path("drafts.**") =>
+        "draft",
+      "published"
+    ),
+    "title": coalesce(
+      title,
+      "Untitled"
+    ),
+    "slug": slug.current,
+    excerpt,
+    coverImage,
+    "date": coalesce(date, _updatedAt),
+    "author": author->{
+      firstName,
+      lastName,
+      picture
+    }
+  }
+--- width 60
+*[_type == "post" && _id != $skip && defined(slug.current)]
+  | order(date desc, _updatedAt desc)[0...$limit] {
+    _id,
+    "status": select(
+      _originalId in path("drafts.**") => "draft",
+      "published"
+    ),
+    "title": coalesce(title, "Untitled"),
+    "slug": slug.current,
+    excerpt,
+    coverImage,
+    "date": coalesce(date, _updatedAt),
+    "author": author->{ firstName, lastName, picture }
+  }
+--- width 80
+*[_type == "post" && _id != $skip && defined(slug.current)]
+  | order(date desc, _updatedAt desc)[0...$limit] {
+    _id,
+    "status": select(_originalId in path("drafts.**") => "draft", "published"),
+    "title": coalesce(title, "Untitled"),
+    "slug": slug.current,
+    excerpt,
+    coverImage,
+    "date": coalesce(date, _updatedAt),
+    "author": author->{ firstName, lastName, picture }
+  }
+--- width 120
+*[_type == "post" && _id != $skip && defined(slug.current)] | order(date desc, _updatedAt desc)[0...$limit] {
+  _id,
+  "status": select(_originalId in path("drafts.**") => "draft", "published"),
+  "title": coalesce(title, "Untitled"),
+  "slug": slug.current,
+  excerpt,
+  coverImage,
+  "date": coalesce(date, _updatedAt),
+  "author": author->{ firstName, lastName, picture }
+}

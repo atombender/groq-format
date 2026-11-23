@@ -1,0 +1,46 @@
+---
+source: tests/gallery.rs
+expression: snapshot
+---
+--- width 40
+*[
+  _type == "post"
+  && (
+    publishedAt < $lastPublishedAt
+    || (
+      publishedAt == $lastPublishedAt
+      && _id < $lastId
+    )
+  )
+]
+  | order(
+    publishedAt desc,
+    _id desc
+  )[0...$pageSize] {
+    _id,
+    title,
+    publishedAt
+  }
+--- width 60
+*[
+  _type == "post"
+  && (
+    publishedAt < $lastPublishedAt
+    || (publishedAt == $lastPublishedAt && _id < $lastId)
+  )
+] | order(publishedAt desc, _id desc)[0...$pageSize] {
+  _id,
+  title,
+  publishedAt
+}
+--- width 80
+*[
+  _type == "post"
+  && (
+    publishedAt < $lastPublishedAt
+    || (publishedAt == $lastPublishedAt && _id < $lastId)
+  )
+] | order(publishedAt desc, _id desc)[0...$pageSize] { _id, title, publishedAt }
+--- width 120
+*[_type == "post" && (publishedAt < $lastPublishedAt || (publishedAt == $lastPublishedAt && _id < $lastId))]
+  | order(publishedAt desc, _id desc)[0...$pageSize] { _id, title, publishedAt }

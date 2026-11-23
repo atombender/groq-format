@@ -1,0 +1,1 @@
+*[_type == "post" && delta::changedAny((title, slug, body))]{"before": before().title, "after": after().title, "operation": delta::operation()}

@@ -1,0 +1,1 @@
+*[_type == "movie" && count((categories[]->slug.current)[@ in ["action", "thriller", "science-fiction"]]) > 0]

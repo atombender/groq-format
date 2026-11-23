@@ -1,0 +1,1 @@
+*[_type == "event" && dateTime(startsAt) > dateTime(now()) - 60 * 60 * 24 * 7 && dateTime(startsAt) < dateTime(now()) + 60 * 60 * 24 * 30] | order(startsAt asc)

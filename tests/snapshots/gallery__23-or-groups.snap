@@ -1,0 +1,38 @@
+---
+source: tests/gallery.rs
+expression: snapshot
+---
+--- width 40
+*[
+  (
+    _type == "post"
+    && published == true
+    && defined(publishedAt)
+  )
+  || (
+    _type == "page" && !defined(parent)
+  )
+  || _id in $pinnedIds
+]
+--- width 60
+*[
+  (
+    _type == "post"
+    && published == true
+    && defined(publishedAt)
+  )
+  || (_type == "page" && !defined(parent))
+  || _id in $pinnedIds
+]
+--- width 80
+*[
+  (_type == "post" && published == true && defined(publishedAt))
+  || (_type == "page" && !defined(parent))
+  || _id in $pinnedIds
+]
+--- width 120
+*[
+  (_type == "post" && published == true && defined(publishedAt))
+  || (_type == "page" && !defined(parent))
+  || _id in $pinnedIds
+]

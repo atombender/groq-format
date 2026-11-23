@@ -1,0 +1,42 @@
+---
+source: tests/gallery.rs
+expression: snapshot
+---
+--- width 40
+*[
+  sanity::partOfRelease($releaseId)
+  && _type in ["post", "page"]
+] {
+  _id,
+  _type,
+  title,
+  "versionOf": sanity::versionOf(_id),
+  "releaseName": sanity::projectId()
+}
+--- width 60
+*[
+  sanity::partOfRelease($releaseId)
+  && _type in ["post", "page"]
+] {
+  _id,
+  _type,
+  title,
+  "versionOf": sanity::versionOf(_id),
+  "releaseName": sanity::projectId()
+}
+--- width 80
+*[sanity::partOfRelease($releaseId) && _type in ["post", "page"]] {
+  _id,
+  _type,
+  title,
+  "versionOf": sanity::versionOf(_id),
+  "releaseName": sanity::projectId()
+}
+--- width 120
+*[sanity::partOfRelease($releaseId) && _type in ["post", "page"]] {
+  _id,
+  _type,
+  title,
+  "versionOf": sanity::versionOf(_id),
+  "releaseName": sanity::projectId()
+}

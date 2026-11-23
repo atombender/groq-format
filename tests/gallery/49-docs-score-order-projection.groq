@@ -1,0 +1,5 @@
+// Adds a point for matches in the title OR description
+*[_type == "post"] 
+  | score(title match "GROQ" || description match "GROQ") 
+  | order(_score desc) 
+  { _score, title }

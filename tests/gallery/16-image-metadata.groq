@@ -1,0 +1,1 @@
+*[_type == "post"]{mainImage{asset->{_id, url, metadata{lqip, blurHash, palette{dominant{background, foreground}}, dimensions{width, height, aspectRatio}}}, alt, hotspot, crop}}

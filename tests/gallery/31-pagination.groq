@@ -1,0 +1,1 @@
+*[_type == "post" && (publishedAt < $lastPublishedAt || (publishedAt == $lastPublishedAt && _id < $lastId))] | order(publishedAt desc, _id desc)[0...$pageSize]{_id, title, publishedAt}

@@ -1,0 +1,25 @@
+---
+source: tests/gallery.rs
+expression: snapshot
+---
+--- width 40
+// Adds a point for matches in the title OR description
+*[_type == "post"]
+  | score(
+    title match "GROQ"
+      || description match "GROQ"
+  )
+  | order(_score desc) { _score, title }
+--- width 60
+// Adds a point for matches in the title OR description
+*[_type == "post"]
+  | score(title match "GROQ" || description match "GROQ")
+  | order(_score desc) { _score, title }
+--- width 80
+// Adds a point for matches in the title OR description
+*[_type == "post"]
+  | score(title match "GROQ" || description match "GROQ")
+  | order(_score desc) { _score, title }
+--- width 120
+// Adds a point for matches in the title OR description
+*[_type == "post"] | score(title match "GROQ" || description match "GROQ") | order(_score desc) { _score, title }

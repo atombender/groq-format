@@ -1,0 +1,32 @@
+---
+source: tests/gallery.rs
+expression: snapshot
+---
+--- width 40
+*[
+  _type == "event"
+  && dateTime(startsAt)
+    > dateTime(now()) - 60 * 60 * 24 * 7
+  && dateTime(startsAt)
+    < dateTime(now())
+      + 60 * 60 * 24 * 30
+] | order(startsAt asc)
+--- width 60
+*[
+  _type == "event"
+  && dateTime(startsAt) > dateTime(now()) - 60 * 60 * 24 * 7
+  && dateTime(startsAt)
+    < dateTime(now()) + 60 * 60 * 24 * 30
+] | order(startsAt asc)
+--- width 80
+*[
+  _type == "event"
+  && dateTime(startsAt) > dateTime(now()) - 60 * 60 * 24 * 7
+  && dateTime(startsAt) < dateTime(now()) + 60 * 60 * 24 * 30
+] | order(startsAt asc)
+--- width 120
+*[
+  _type == "event"
+  && dateTime(startsAt) > dateTime(now()) - 60 * 60 * 24 * 7
+  && dateTime(startsAt) < dateTime(now()) + 60 * 60 * 24 * 30
+] | order(startsAt asc)

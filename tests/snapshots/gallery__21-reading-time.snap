@@ -1,0 +1,39 @@
+---
+source: tests/gallery.rs
+expression: snapshot
+---
+--- width 40
+*[_type == "post"] {
+  title,
+  "excerpt": array::join(
+    string::split(
+      pt::text(body),
+      ""
+    )[0...255],
+    ""
+  ) + "…",
+  "readingTime": round(
+    length(pt::text(body)) / 5 / 180
+  )
+}
+--- width 60
+*[_type == "post"] {
+  title,
+  "excerpt": array::join(
+    string::split(pt::text(body), "")[0...255],
+    ""
+  ) + "…",
+  "readingTime": round(length(pt::text(body)) / 5 / 180)
+}
+--- width 80
+*[_type == "post"] {
+  title,
+  "excerpt": array::join(string::split(pt::text(body), "")[0...255], "") + "…",
+  "readingTime": round(length(pt::text(body)) / 5 / 180)
+}
+--- width 120
+*[_type == "post"] {
+  title,
+  "excerpt": array::join(string::split(pt::text(body), "")[0...255], "") + "…",
+  "readingTime": round(length(pt::text(body)) / 5 / 180)
+}

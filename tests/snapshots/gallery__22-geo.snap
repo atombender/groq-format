@@ -1,0 +1,39 @@
+---
+source: tests/gallery.rs
+expression: snapshot
+---
+--- width 40
+*[
+  _type == "store"
+  && geo::distance(location, $origin)
+    < 10000
+]
+  | order(geo::distance(
+    location,
+    $origin
+  ) asc) {
+    name,
+    "distance": geo::distance(
+      location,
+      $origin
+    )
+  }
+--- width 60
+*[
+  _type == "store"
+  && geo::distance(location, $origin) < 10000
+] | order(geo::distance(location, $origin) asc) {
+  name,
+  "distance": geo::distance(location, $origin)
+}
+--- width 80
+*[_type == "store" && geo::distance(location, $origin) < 10000]
+  | order(geo::distance(location, $origin) asc) {
+    name,
+    "distance": geo::distance(location, $origin)
+  }
+--- width 120
+*[_type == "store" && geo::distance(location, $origin) < 10000] | order(geo::distance(location, $origin) asc) {
+  name,
+  "distance": geo::distance(location, $origin)
+}
