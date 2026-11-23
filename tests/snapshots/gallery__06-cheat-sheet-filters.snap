@@ -1,0 +1,40 @@
+---
+source: tests/gallery.rs
+expression: snapshot
+---
+--- width 40
+*[
+  _type == "movie"
+  && releaseYear >= 1979
+  && releaseYear < 1990
+  && "sci-fi" in genres
+  && rating > 7.5
+  && !(slug.current in $excluded)
+] { title, releaseYear }
+--- width 60
+*[
+  _type == "movie"
+  && releaseYear >= 1979
+  && releaseYear < 1990
+  && "sci-fi" in genres
+  && rating > 7.5
+  && !(slug.current in $excluded)
+] { title, releaseYear }
+--- width 80
+*[
+  _type == "movie"
+  && releaseYear >= 1979
+  && releaseYear < 1990
+  && "sci-fi" in genres
+  && rating > 7.5
+  && !(slug.current in $excluded)
+] { title, releaseYear }
+--- width 120
+*[
+  _type == "movie"
+  && releaseYear >= 1979
+  && releaseYear < 1990
+  && "sci-fi" in genres
+  && rating > 7.5
+  && !(slug.current in $excluded)
+] { title, releaseYear }

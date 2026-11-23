@@ -1,0 +1,129 @@
+---
+source: tests/gallery.rs
+expression: snapshot
+---
+--- width 40
+*[
+  _type == "product"
+  && store.slug.current == $slug
+  && !store.isDeleted
+  && store.status == "active"
+][0] {
+  _id,
+  "available":
+    !store.isDeleted
+    && store.status == "active",
+  body[] {
+    ...,
+    markDefs[] {
+      ...,
+      (_type == "annotationProduct") => {
+        "productWithVariant": {
+          "product": @.productWithVariant.product->{
+            "available":
+              !store.isDeleted
+              && store.status
+                == "active",
+            "gid": store.gid,
+            "slug": store.slug.current
+          }
+        }
+      }
+    }
+  },
+  "gid": store.gid,
+  "slug": store.slug.current,
+  "variants": store.variants[]->{
+    "gid": store.gid,
+    "title": store.title,
+    "price": store.price
+  }
+}
+--- width 60
+*[
+  _type == "product"
+  && store.slug.current == $slug
+  && !store.isDeleted
+  && store.status == "active"
+][0] {
+  _id,
+  "available": !store.isDeleted && store.status == "active",
+  body[] {
+    ...,
+    markDefs[] {
+      ...,
+      (_type == "annotationProduct") => {
+        "productWithVariant": {
+          "product": @.productWithVariant.product->{
+            "available":
+              !store.isDeleted && store.status == "active",
+            "gid": store.gid,
+            "slug": store.slug.current
+          }
+        }
+      }
+    }
+  },
+  "gid": store.gid,
+  "slug": store.slug.current,
+  "variants": store.variants[]->{
+    "gid": store.gid,
+    "title": store.title,
+    "price": store.price
+  }
+}
+--- width 80
+*[
+  _type == "product"
+  && store.slug.current == $slug
+  && !store.isDeleted
+  && store.status == "active"
+][0] {
+  _id,
+  "available": !store.isDeleted && store.status == "active",
+  body[] {
+    ...,
+    markDefs[] {
+      ...,
+      (_type == "annotationProduct") => {
+        "productWithVariant": {
+          "product": @.productWithVariant.product->{
+            "available": !store.isDeleted && store.status == "active",
+            "gid": store.gid,
+            "slug": store.slug.current
+          }
+        }
+      }
+    }
+  },
+  "gid": store.gid,
+  "slug": store.slug.current,
+  "variants": store.variants[]->{
+    "gid": store.gid,
+    "title": store.title,
+    "price": store.price
+  }
+}
+--- width 120
+*[_type == "product" && store.slug.current == $slug && !store.isDeleted && store.status == "active"][0] {
+  _id,
+  "available": !store.isDeleted && store.status == "active",
+  body[] {
+    ...,
+    markDefs[] {
+      ...,
+      (_type == "annotationProduct") => {
+        "productWithVariant": {
+          "product": @.productWithVariant.product->{
+            "available": !store.isDeleted && store.status == "active",
+            "gid": store.gid,
+            "slug": store.slug.current
+          }
+        }
+      }
+    }
+  },
+  "gid": store.gid,
+  "slug": store.slug.current,
+  "variants": store.variants[]->{ "gid": store.gid, "title": store.title, "price": store.price }
+}

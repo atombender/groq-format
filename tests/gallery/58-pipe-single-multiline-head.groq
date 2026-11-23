@@ -1,0 +1,11 @@
+*[
+  _type == $type
+  && nationalDexNumber >= 1
+  && nationalDexNumber <= 151
+  && count(types[lower(@->name) == "water"]) > 0
+] | order(baseStats.attack desc, nationalDexNumber asc) {
+  name,
+  nationalDexNumber,
+  "types": types[]->name,
+  "attack": baseStats.attack
+}

@@ -1,0 +1,1 @@
+*[_type == $type && slug.current == $slug][0]{..., "related": *[_type == ^._type && _id != ^._id && count(tags[@._ref in ^.^.tags[]._ref]) > 0] | order(publishedAt desc)[0...3]{title, "slug": slug.current}}

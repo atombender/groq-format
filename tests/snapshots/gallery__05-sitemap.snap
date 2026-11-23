@@ -1,0 +1,32 @@
+---
+source: tests/gallery.rs
+expression: snapshot
+---
+--- width 40
+*[
+  _type == "page"
+  || _type == "post"
+    && defined(slug.current)
+] | order(_type asc) {
+  "slug": slug.current,
+  _type,
+  _updatedAt
+}
+--- width 60
+*[
+  _type == "page"
+  || _type == "post" && defined(slug.current)
+] | order(_type asc) {
+  "slug": slug.current,
+  _type,
+  _updatedAt
+}
+--- width 80
+*[_type == "page" || _type == "post" && defined(slug.current)]
+  | order(_type asc) { "slug": slug.current, _type, _updatedAt }
+--- width 120
+*[_type == "page" || _type == "post" && defined(slug.current)] | order(_type asc) {
+  "slug": slug.current,
+  _type,
+  _updatedAt
+}

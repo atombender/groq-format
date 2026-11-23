@@ -1,0 +1,1 @@
+*[_type == "post" && (title match $q || body[].children[].text match $q)] | score(title match $q, boost(excerpt match $q, 2), boost(pt::text(body) match $q, 0.5)) | order(_score desc)[0...20]{_score, title, "slug": slug.current}

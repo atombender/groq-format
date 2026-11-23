@@ -1,0 +1,38 @@
+---
+source: tests/gallery.rs
+expression: snapshot
+---
+--- width 40
+*[_type == "post"] {
+  "tags": array::unique(tags[]->title),
+  "tagList": array::join(
+    tags[]->title,
+    ", "
+  ),
+  "hasOverlap": array::intersects(
+    tags[]._ref,
+    $tagIds
+  ),
+  "compact": array::compact(authors[]->name)
+}
+--- width 60
+*[_type == "post"] {
+  "tags": array::unique(tags[]->title),
+  "tagList": array::join(tags[]->title, ", "),
+  "hasOverlap": array::intersects(tags[]._ref, $tagIds),
+  "compact": array::compact(authors[]->name)
+}
+--- width 80
+*[_type == "post"] {
+  "tags": array::unique(tags[]->title),
+  "tagList": array::join(tags[]->title, ", "),
+  "hasOverlap": array::intersects(tags[]._ref, $tagIds),
+  "compact": array::compact(authors[]->name)
+}
+--- width 120
+*[_type == "post"] {
+  "tags": array::unique(tags[]->title),
+  "tagList": array::join(tags[]->title, ", "),
+  "hasOverlap": array::intersects(tags[]._ref, $tagIds),
+  "compact": array::compact(authors[]->name)
+}

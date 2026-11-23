@@ -1,0 +1,27 @@
+---
+source: tests/gallery.rs
+expression: snapshot
+---
+--- width 40
+*[
+  !(_type match "system.*")
+  && !defined(hidden)
+  && -price < 0
+  && !(_id in path("drafts.**"))
+]
+--- width 60
+*[
+  !(_type match "system.*")
+  && !defined(hidden)
+  && -price < 0
+  && !(_id in path("drafts.**"))
+]
+--- width 80
+*[
+  !(_type match "system.*")
+  && !defined(hidden)
+  && -price < 0
+  && !(_id in path("drafts.**"))
+]
+--- width 120
+*[!(_type match "system.*") && !defined(hidden) && -price < 0 && !(_id in path("drafts.**"))]

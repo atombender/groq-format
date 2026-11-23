@@ -1,0 +1,27 @@
+---
+source: tests/gallery.rs
+expression: snapshot
+---
+--- width 40
+*[
+  _type == "product"
+  && price in 10..100
+  && rating in 3...5
+  && count(variants) in 1..10
+] { title, price }
+--- width 60
+*[
+  _type == "product"
+  && price in 10..100
+  && rating in 3...5
+  && count(variants) in 1..10
+] { title, price }
+--- width 80
+*[
+  _type == "product"
+  && price in 10..100
+  && rating in 3...5
+  && count(variants) in 1..10
+] { title, price }
+--- width 120
+*[_type == "product" && price in 10..100 && rating in 3...5 && count(variants) in 1..10] { title, price }

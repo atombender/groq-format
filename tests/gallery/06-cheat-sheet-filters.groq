@@ -1,0 +1,1 @@
+*[_type == "movie" && releaseYear >= 1979 && releaseYear < 1990 && "sci-fi" in genres && rating > 7.5 && !(slug.current in $excluded)]{title, releaseYear}

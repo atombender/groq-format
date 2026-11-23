@@ -1,0 +1,74 @@
+---
+source: tests/gallery.rs
+expression: snapshot
+---
+--- width 40
+*[_type == "category"] {
+  title,
+  "topPosts": array::join(
+    *[
+      _type == "post"
+      && references(^._id)
+    ] | order(views desc)[0...5].title,
+    ", "
+  ),
+  "postCount": count(
+    *[
+      _type == "post"
+      && references(^._id)
+      && defined(publishedAt)
+    ] | order(publishedAt desc)
+  ),
+  "newest": coalesce(
+    *[
+      _type == "post"
+      && references(^._id)
+    ]
+      | order(publishedAt desc)[0].title,
+    "none"
+  )
+}
+--- width 60
+*[_type == "category"] {
+  title,
+  "topPosts": array::join(
+    *[_type == "post" && references(^._id)]
+      | order(views desc)[0...5].title,
+    ", "
+  ),
+  "postCount": count(
+    *[
+      _type == "post"
+      && references(^._id)
+      && defined(publishedAt)
+    ] | order(publishedAt desc)
+  ),
+  "newest": coalesce(
+    *[_type == "post" && references(^._id)]
+      | order(publishedAt desc)[0].title,
+    "none"
+  )
+}
+--- width 80
+*[_type == "category"] {
+  title,
+  "topPosts": array::join(
+    *[_type == "post" && references(^._id)] | order(views desc)[0...5].title,
+    ", "
+  ),
+  "postCount": count(
+    *[_type == "post" && references(^._id) && defined(publishedAt)]
+      | order(publishedAt desc)
+  ),
+  "newest": coalesce(
+    *[_type == "post" && references(^._id)] | order(publishedAt desc)[0].title,
+    "none"
+  )
+}
+--- width 120
+*[_type == "category"] {
+  title,
+  "topPosts": array::join(*[_type == "post" && references(^._id)] | order(views desc)[0...5].title, ", "),
+  "postCount": count(*[_type == "post" && references(^._id) && defined(publishedAt)] | order(publishedAt desc)),
+  "newest": coalesce(*[_type == "post" && references(^._id)] | order(publishedAt desc)[0].title, "none")
+}

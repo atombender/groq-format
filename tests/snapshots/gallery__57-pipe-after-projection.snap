@@ -1,0 +1,56 @@
+---
+source: tests/gallery.rs
+expression: snapshot
+---
+--- width 40
+*[
+  _type == "post"
+  && published == true
+  && category
+    in ["tech", "science", "culture"]
+] {
+  title,
+  "slug": slug.current,
+  "excerpt": pt::text(body)[0...200],
+  author->{
+    name,
+    "avatar": image.asset->url
+  },
+  categories[]->{ title, slug },
+  _createdAt
+}[0...10] | order(_createdAt desc)
+--- width 60
+*[
+  _type == "post"
+  && published == true
+  && category in ["tech", "science", "culture"]
+] {
+  title,
+  "slug": slug.current,
+  "excerpt": pt::text(body)[0...200],
+  author->{ name, "avatar": image.asset->url },
+  categories[]->{ title, slug },
+  _createdAt
+}[0...10] | order(_createdAt desc)
+--- width 80
+*[
+  _type == "post"
+  && published == true
+  && category in ["tech", "science", "culture"]
+] {
+  title,
+  "slug": slug.current,
+  "excerpt": pt::text(body)[0...200],
+  author->{ name, "avatar": image.asset->url },
+  categories[]->{ title, slug },
+  _createdAt
+}[0...10] | order(_createdAt desc)
+--- width 120
+*[_type == "post" && published == true && category in ["tech", "science", "culture"]] {
+  title,
+  "slug": slug.current,
+  "excerpt": pt::text(body)[0...200],
+  author->{ name, "avatar": image.asset->url },
+  categories[]->{ title, slug },
+  _createdAt
+}[0...10] | order(_createdAt desc)

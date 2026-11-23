@@ -1,0 +1,3 @@
+*[_type == "article" && language == $lang] | score(title match $q, boost(body[].children[].text match $q, 0.5)) | order(_score desc, publishedAt desc) [0...$limit] {
+  _id, title, "excerpt": array::join(string::split(pt::text(body), "")[0...200], ""), _score
+}

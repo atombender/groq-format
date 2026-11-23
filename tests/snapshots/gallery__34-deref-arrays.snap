@@ -1,0 +1,39 @@
+---
+source: tests/gallery.rs
+expression: snapshot
+---
+--- width 40
+*[_type == "post"] {
+  "categories": categories[]->title,
+  "authorName": author->name,
+  "authorImage":
+    author->image.asset->url,
+  "firstCategory": categories[0]->{
+    title,
+    "slug": slug.current
+  }
+}
+--- width 60
+*[_type == "post"] {
+  "categories": categories[]->title,
+  "authorName": author->name,
+  "authorImage": author->image.asset->url,
+  "firstCategory": categories[0]->{
+    title,
+    "slug": slug.current
+  }
+}
+--- width 80
+*[_type == "post"] {
+  "categories": categories[]->title,
+  "authorName": author->name,
+  "authorImage": author->image.asset->url,
+  "firstCategory": categories[0]->{ title, "slug": slug.current }
+}
+--- width 120
+*[_type == "post"] {
+  "categories": categories[]->title,
+  "authorName": author->name,
+  "authorImage": author->image.asset->url,
+  "firstCategory": categories[0]->{ title, "slug": slug.current }
+}

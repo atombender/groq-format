@@ -1,0 +1,27 @@
+---
+source: tests/gallery.rs
+expression: snapshot
+---
+--- width 40
+*[_type == "post"] // all posts
+  | score(title match $q) // by relevance
+  // newest first among equals
+  | order(
+    _score desc,
+    _createdAt desc
+  )[0...10] { title }
+--- width 60
+*[_type == "post"] // all posts
+  | score(title match $q) // by relevance
+  // newest first among equals
+  | order(_score desc, _createdAt desc)[0...10] { title }
+--- width 80
+*[_type == "post"] // all posts
+  | score(title match $q) // by relevance
+  // newest first among equals
+  | order(_score desc, _createdAt desc)[0...10] { title }
+--- width 120
+*[_type == "post"] // all posts
+  | score(title match $q) // by relevance
+  // newest first among equals
+  | order(_score desc, _createdAt desc)[0...10] { title }

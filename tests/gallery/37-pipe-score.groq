@@ -1,0 +1,1 @@
+*[_type == $type] | score(text::semanticSimilarity($q)) | order(_score desc)[0...10] { title }

@@ -1,0 +1,69 @@
+---
+source: tests/gallery.rs
+expression: snapshot
+---
+--- width 40
+*[
+  _type == "course"
+  && slug.current == $slug
+][0] {
+  ...,
+  "lessons": lessons[]->{
+    ...,
+    "slug": slug[$language].current,
+    "title": title[$language],
+    "completed": count(*[
+      _type == "progress"
+      && lesson._ref == ^._id
+      && user._ref == $userId
+    ]) > 0
+  },
+  "presenters": presenters[]->{
+    name,
+    "title": title[$language],
+    photo
+  }
+}
+--- width 60
+*[_type == "course" && slug.current == $slug][0] {
+  ...,
+  "lessons": lessons[]->{
+    ...,
+    "slug": slug[$language].current,
+    "title": title[$language],
+    "completed": count(*[
+      _type == "progress"
+      && lesson._ref == ^._id
+      && user._ref == $userId
+    ]) > 0
+  },
+  "presenters": presenters[]->{
+    name,
+    "title": title[$language],
+    photo
+  }
+}
+--- width 80
+*[_type == "course" && slug.current == $slug][0] {
+  ...,
+  "lessons": lessons[]->{
+    ...,
+    "slug": slug[$language].current,
+    "title": title[$language],
+    "completed": count(*[
+      _type == "progress" && lesson._ref == ^._id && user._ref == $userId
+    ]) > 0
+  },
+  "presenters": presenters[]->{ name, "title": title[$language], photo }
+}
+--- width 120
+*[_type == "course" && slug.current == $slug][0] {
+  ...,
+  "lessons": lessons[]->{
+    ...,
+    "slug": slug[$language].current,
+    "title": title[$language],
+    "completed": count(*[_type == "progress" && lesson._ref == ^._id && user._ref == $userId]) > 0
+  },
+  "presenters": presenters[]->{ name, "title": title[$language], photo }
+}

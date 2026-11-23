@@ -1,0 +1,34 @@
+---
+source: tests/gallery.rs
+expression: snapshot
+---
+--- width 40
+*[
+  _type == "post"
+  && references(
+    *[
+      _type == "category"
+      && slug.current == $slug
+    ]._id
+  )
+] | order(publishedAt desc) {
+  title,
+  "slug": slug.current
+}
+--- width 60
+*[
+  _type == "post"
+  && references(
+    *[_type == "category" && slug.current == $slug]._id
+  )
+] | order(publishedAt desc) { title, "slug": slug.current }
+--- width 80
+*[
+  _type == "post"
+  && references(*[_type == "category" && slug.current == $slug]._id)
+] | order(publishedAt desc) { title, "slug": slug.current }
+--- width 120
+*[_type == "post" && references(*[_type == "category" && slug.current == $slug]._id)] | order(publishedAt desc) {
+  title,
+  "slug": slug.current
+}

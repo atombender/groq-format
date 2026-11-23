@@ -1,0 +1,58 @@
+---
+source: tests/gallery.rs
+expression: snapshot
+---
+--- width 40
+// Create your own objects
+// https://groq.dev/lcGV0Km6dpvYovREqq1gLS
+{
+  // People ordered by Nobel prize year
+  "peopleByPrizeYear":
+    *[] | order(prizes[0].year desc) {
+      "name": firstname + " " + surname,
+      "orderYear": prizes[0].year,
+      prizes
+    },
+  // List of all prizes ordered by year awarded
+  "allPrizes":
+    *[].prizes[] | order(year desc)
+}
+--- width 60
+// Create your own objects
+// https://groq.dev/lcGV0Km6dpvYovREqq1gLS
+{
+  // People ordered by Nobel prize year
+  "peopleByPrizeYear": *[] | order(prizes[0].year desc) {
+    "name": firstname + " " + surname,
+    "orderYear": prizes[0].year,
+    prizes
+  },
+  // List of all prizes ordered by year awarded
+  "allPrizes": *[].prizes[] | order(year desc)
+}
+--- width 80
+// Create your own objects
+// https://groq.dev/lcGV0Km6dpvYovREqq1gLS
+{
+  // People ordered by Nobel prize year
+  "peopleByPrizeYear": *[] | order(prizes[0].year desc) {
+    "name": firstname + " " + surname,
+    "orderYear": prizes[0].year,
+    prizes
+  },
+  // List of all prizes ordered by year awarded
+  "allPrizes": *[].prizes[] | order(year desc)
+}
+--- width 120
+// Create your own objects
+// https://groq.dev/lcGV0Km6dpvYovREqq1gLS
+{
+  // People ordered by Nobel prize year
+  "peopleByPrizeYear": *[] | order(prizes[0].year desc) {
+    "name": firstname + " " + surname,
+    "orderYear": prizes[0].year,
+    prizes
+  },
+  // List of all prizes ordered by year awarded
+  "allPrizes": *[].prizes[] | order(year desc)
+}

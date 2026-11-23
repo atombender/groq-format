@@ -1,0 +1,64 @@
+---
+source: tests/gallery.rs
+expression: snapshot
+---
+--- width 40
+// Projections also have syntactic sugar for inline conditionals
+*[_type == "movie"] {
+  ...,
+  releaseDate >= "2018-06-01" => {
+    "screenings": *[
+      _type == "screening"
+      && movie._ref == ^._id
+    ],
+    "news": *[
+      _type == "news"
+      && movie._ref == ^._id
+    ]
+  },
+  popularity > 20 && rating > 7.0 => {
+    "featured": true,
+    "awards": *[
+      _type == "award"
+      && movie._ref == ^._id
+    ]
+  }
+}
+--- width 60
+// Projections also have syntactic sugar for inline conditionals
+*[_type == "movie"] {
+  ...,
+  releaseDate >= "2018-06-01" => {
+    "screenings": *[
+      _type == "screening" && movie._ref == ^._id
+    ],
+    "news": *[_type == "news" && movie._ref == ^._id]
+  },
+  popularity > 20 && rating > 7.0 => {
+    "featured": true,
+    "awards": *[_type == "award" && movie._ref == ^._id]
+  }
+}
+--- width 80
+// Projections also have syntactic sugar for inline conditionals
+*[_type == "movie"] {
+  ...,
+  releaseDate >= "2018-06-01" => {
+    "screenings": *[_type == "screening" && movie._ref == ^._id],
+    "news": *[_type == "news" && movie._ref == ^._id]
+  },
+  popularity > 20 && rating > 7.0 => {
+    "featured": true,
+    "awards": *[_type == "award" && movie._ref == ^._id]
+  }
+}
+--- width 120
+// Projections also have syntactic sugar for inline conditionals
+*[_type == "movie"] {
+  ...,
+  releaseDate >= "2018-06-01" => {
+    "screenings": *[_type == "screening" && movie._ref == ^._id],
+    "news": *[_type == "news" && movie._ref == ^._id]
+  },
+  popularity > 20 && rating > 7.0 => { "featured": true, "awards": *[_type == "award" && movie._ref == ^._id] }
+}

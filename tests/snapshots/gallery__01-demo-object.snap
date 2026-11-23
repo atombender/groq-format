@@ -1,0 +1,70 @@
+---
+source: tests/gallery.rs
+expression: snapshot
+---
+--- width 40
+{
+  "unknownType": *[
+    _type == "bok"
+  ][0...3] { title },
+  "typos": *[_type == "book"] {
+    tittle,
+    "by": title->name
+  }[0...3],
+  "joinInFilter": *[
+    _type == "book"
+    && author->name
+      == "Ada GROQ-lovelace"
+  ][0...5] { title },
+  "deepPage": *[
+    _type == "book"
+  ][200000...200010] { title },
+  "correlatedCount": *[
+    _type == "author"
+  ][0...3] {
+    name,
+    "books": count(*[
+      _type == "book"
+      && author._ref == ^._id
+    ])
+  }
+}
+--- width 60
+{
+  "unknownType": *[_type == "bok"][0...3] { title },
+  "typos": *[_type == "book"] {
+    tittle,
+    "by": title->name
+  }[0...3],
+  "joinInFilter": *[
+    _type == "book" && author->name == "Ada GROQ-lovelace"
+  ][0...5] { title },
+  "deepPage": *[_type == "book"][200000...200010] { title },
+  "correlatedCount": *[_type == "author"][0...3] {
+    name,
+    "books": count(*[
+      _type == "book" && author._ref == ^._id
+    ])
+  }
+}
+--- width 80
+{
+  "unknownType": *[_type == "bok"][0...3] { title },
+  "typos": *[_type == "book"] { tittle, "by": title->name }[0...3],
+  "joinInFilter": *[
+    _type == "book" && author->name == "Ada GROQ-lovelace"
+  ][0...5] { title },
+  "deepPage": *[_type == "book"][200000...200010] { title },
+  "correlatedCount": *[_type == "author"][0...3] {
+    name,
+    "books": count(*[_type == "book" && author._ref == ^._id])
+  }
+}
+--- width 120
+{
+  "unknownType": *[_type == "bok"][0...3] { title },
+  "typos": *[_type == "book"] { tittle, "by": title->name }[0...3],
+  "joinInFilter": *[_type == "book" && author->name == "Ada GROQ-lovelace"][0...5] { title },
+  "deepPage": *[_type == "book"][200000...200010] { title },
+  "correlatedCount": *[_type == "author"][0...3] { name, "books": count(*[_type == "book" && author._ref == ^._id]) }
+}

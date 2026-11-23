@@ -1,0 +1,6 @@
+// The first select() parameter without => is returned if no previous matches are found
+*[_type=='movie']{..., "popularity": select(
+  popularity > 20 => "high",
+  popularity > 10 => "medium",
+  "low"
+)}

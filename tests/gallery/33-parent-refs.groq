@@ -1,0 +1,1 @@
+*[_type == "category"]{title, "children": *[_type == "category" && parent._ref == ^._id]{title, "grandchildren": *[_type == "category" && parent._ref == ^._id && ^.^.featured == true]{title}}}

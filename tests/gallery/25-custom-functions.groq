@@ -1,0 +1,3 @@
+fn image::asset($asset) = $asset->{url, metadata{lqip, dimensions}};
+fn image::field($image) = $image{crop, hotspot, "asset": image::asset(asset)};
+*[_type == "post"]{title, "image": image::field(mainImage), "gallery": gallery[]{..., "image": image::field(image)}}

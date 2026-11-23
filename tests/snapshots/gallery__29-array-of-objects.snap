@@ -1,0 +1,54 @@
+---
+source: tests/gallery.rs
+expression: snapshot
+---
+--- width 40
+{
+  "filters": [
+    {
+      "field": "title",
+      "op": "match",
+      "value": $q
+    },
+    {
+      "field": "_type",
+      "op": "==",
+      "value": "post"
+    },
+    {
+      "field": "rating",
+      "op": ">=",
+      "value": 4
+    }
+  ],
+  "results": *[
+    _type == "post"
+  ][0...10] { title }
+}
+--- width 60
+{
+  "filters": [
+    { "field": "title", "op": "match", "value": $q },
+    { "field": "_type", "op": "==", "value": "post" },
+    { "field": "rating", "op": ">=", "value": 4 }
+  ],
+  "results": *[_type == "post"][0...10] { title }
+}
+--- width 80
+{
+  "filters": [
+    { "field": "title", "op": "match", "value": $q },
+    { "field": "_type", "op": "==", "value": "post" },
+    { "field": "rating", "op": ">=", "value": 4 }
+  ],
+  "results": *[_type == "post"][0...10] { title }
+}
+--- width 120
+{
+  "filters": [
+    { "field": "title", "op": "match", "value": $q },
+    { "field": "_type", "op": "==", "value": "post" },
+    { "field": "rating", "op": ">=", "value": 4 }
+  ],
+  "results": *[_type == "post"][0...10] { title }
+}

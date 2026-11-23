@@ -1,0 +1,7 @@
+// Creates a scoring system where $term matching in the title
+// is worth more than matching in the body
+*[_type == "movie" && movieRating > 3] | score(
+  boost(title match $term, 4),
+  boost(body match $term, 1),
+  boost(movieRating > 8, 3)
+)

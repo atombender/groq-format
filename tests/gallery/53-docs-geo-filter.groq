@@ -1,0 +1,7 @@
+// Creates a "marathonRoutes" array that contains
+// all marathons whose routes intersect with the current neighborhood
+*[_type == "neighborhood"] {
+  "marathonRoutes": *[_type == "marathon" && 
+                        geo::intersects(^.neighborhoodRegion, routeLine)  
+                      ]
+}

@@ -1,0 +1,30 @@
+---
+source: tests/gallery.rs
+expression: snapshot
+---
+--- width 40
+*[
+  _type == "movie"
+  && releaseYear >= 1979
+] {
+  _id,
+  title,
+  releaseYear,
+  director->{ name }
+}
+--- width 60
+*[_type == "movie" && releaseYear >= 1979] {
+  _id,
+  title,
+  releaseYear,
+  director->{ name }
+}
+--- width 80
+*[_type == "movie" && releaseYear >= 1979] {
+  _id,
+  title,
+  releaseYear,
+  director->{ name }
+}
+--- width 120
+*[_type == "movie" && releaseYear >= 1979] { _id, title, releaseYear, director->{ name } }

@@ -18,3 +18,8 @@ path = "src/main.rs"
 groq-parser = { git = "https://github.com/sanity-io/groq-parser-rs.git" }
 clap = { version = "4", features = ["derive"] }
 tempfile = "3"
+unicode-width = "0.2"
+
+[dev-dependencies]
+insta = "1"
+proptest = "1"

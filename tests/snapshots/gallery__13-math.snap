@@ -1,0 +1,41 @@
+---
+source: tests/gallery.rs
+expression: snapshot
+---
+--- width 40
+*[_type == "product" && price > 0] {
+  title,
+  "total": price * quantity,
+  "discounted":
+    price * (1 - discount / 100),
+  "vat": round(price * 0.25, 2),
+  "squared": price ** 2,
+  "remainder": stock % 12
+}
+--- width 60
+*[_type == "product" && price > 0] {
+  title,
+  "total": price * quantity,
+  "discounted": price * (1 - discount / 100),
+  "vat": round(price * 0.25, 2),
+  "squared": price ** 2,
+  "remainder": stock % 12
+}
+--- width 80
+*[_type == "product" && price > 0] {
+  title,
+  "total": price * quantity,
+  "discounted": price * (1 - discount / 100),
+  "vat": round(price * 0.25, 2),
+  "squared": price ** 2,
+  "remainder": stock % 12
+}
+--- width 120
+*[_type == "product" && price > 0] {
+  title,
+  "total": price * quantity,
+  "discounted": price * (1 - discount / 100),
+  "vat": round(price * 0.25, 2),
+  "squared": price ** 2,
+  "remainder": stock % 12
+}

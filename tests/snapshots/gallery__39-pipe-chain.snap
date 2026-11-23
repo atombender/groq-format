@@ -1,0 +1,64 @@
+---
+source: tests/gallery.rs
+expression: snapshot
+---
+--- width 40
+*[
+  _type == "article"
+  && language == $lang
+]
+  | score(
+    title match $q,
+    boost(
+      body[].children[].text match $q,
+      0.5
+    )
+  )
+  | order(
+    _score desc,
+    publishedAt desc
+  )[0...$limit] {
+    _id,
+    title,
+    "excerpt": array::join(
+      string::split(
+        pt::text(body),
+        ""
+      )[0...200],
+      ""
+    ),
+    _score
+  }
+--- width 60
+*[_type == "article" && language == $lang]
+  | score(
+    title match $q,
+    boost(body[].children[].text match $q, 0.5)
+  )
+  | order(_score desc, publishedAt desc)[0...$limit] {
+    _id,
+    title,
+    "excerpt": array::join(
+      string::split(pt::text(body), "")[0...200],
+      ""
+    ),
+    _score
+  }
+--- width 80
+*[_type == "article" && language == $lang]
+  | score(title match $q, boost(body[].children[].text match $q, 0.5))
+  | order(_score desc, publishedAt desc)[0...$limit] {
+    _id,
+    title,
+    "excerpt": array::join(string::split(pt::text(body), "")[0...200], ""),
+    _score
+  }
+--- width 120
+*[_type == "article" && language == $lang]
+  | score(title match $q, boost(body[].children[].text match $q, 0.5))
+  | order(_score desc, publishedAt desc)[0...$limit] {
+    _id,
+    title,
+    "excerpt": array::join(string::split(pt::text(body), "")[0...200], ""),
+    _score
+  }

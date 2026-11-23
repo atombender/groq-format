@@ -1,0 +1,1 @@
+*[_type == "post" && title == "An unusually long title that will never fit on a single line of eighty columns"]{title}

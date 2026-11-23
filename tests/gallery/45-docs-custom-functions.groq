@@ -1,0 +1,31 @@
+fn ex::blocks($arr) = $arr {
+  ...,
+  _type == "docsCallout" => {
+    ...,
+    content[] {
+      ...,
+      markDefs[] {
+        ...,
+        _type == "link" => {
+          isInternal,
+          _key,
+          _type,
+          reference->,
+          url
+        },
+        _type == "acronym" => {
+          _key,
+          _type,
+          value
+        }
+      }
+    }
+  }
+};
+
+*[_type == "article"] {
+  _id,
+  title,
+  "slug": slug.current,
+  "content": ex::blocks(content[])
+}

@@ -1,0 +1,61 @@
+---
+source: tests/gallery.rs
+expression: snapshot
+---
+--- width 40
+fn image::asset($asset) = $asset->{
+  url,
+  metadata { lqip, dimensions }
+};
+fn image::field($image) = $image {
+  crop,
+  hotspot,
+  "asset": image::asset(asset)
+};
+
+*[_type == "post"] {
+  title,
+  "image": image::field(mainImage),
+  "gallery": gallery[] {
+    ...,
+    "image": image::field(image)
+  }
+}
+--- width 60
+fn image::asset($asset) = $asset->{
+  url,
+  metadata { lqip, dimensions }
+};
+fn image::field($image) = $image {
+  crop,
+  hotspot,
+  "asset": image::asset(asset)
+};
+
+*[_type == "post"] {
+  title,
+  "image": image::field(mainImage),
+  "gallery": gallery[] { ..., "image": image::field(image) }
+}
+--- width 80
+fn image::asset($asset) = $asset->{ url, metadata { lqip, dimensions } };
+fn image::field($image) = $image {
+  crop,
+  hotspot,
+  "asset": image::asset(asset)
+};
+
+*[_type == "post"] {
+  title,
+  "image": image::field(mainImage),
+  "gallery": gallery[] { ..., "image": image::field(image) }
+}
+--- width 120
+fn image::asset($asset) = $asset->{ url, metadata { lqip, dimensions } };
+fn image::field($image) = $image { crop, hotspot, "asset": image::asset(asset) };
+
+*[_type == "post"] {
+  title,
+  "image": image::field(mainImage),
+  "gallery": gallery[] { ..., "image": image::field(image) }
+}

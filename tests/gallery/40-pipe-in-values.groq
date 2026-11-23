@@ -1,0 +1,7 @@
+{
+  "latest": *[_type == "post"] | order(_createdAt desc)[0...3] { title },
+  "popular": *[_type == "post" && defined(slug.current)] | order(views desc)[0...5] { title, "slug": slug.current, views },
+  "search": *[_type in ["post", "page", "product"] && language == $lang] | score(text::semanticSimilarity($q)) | order(_score desc)[0...10] { _type, title, "url": select(_type == "post" => "/blog/" + slug.current, "/" + slug.current) },
+  "total": count(*[_type == "post"] | order(_createdAt desc)),
+  "recent": *[_type == "author"] | order(_createdAt desc)[0].name
+}

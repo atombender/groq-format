@@ -1,0 +1,4 @@
+{
+  "codepointOrder":     ["Zebra", "apple", "banana", "Ápple", "Émile", "árbol"] | order(@),
+  "lowerOnlyFixesCase": ["Zebra", "apple", "banana", "Ápple", "Émile", "árbol"] | order(string::lower(@))
+}

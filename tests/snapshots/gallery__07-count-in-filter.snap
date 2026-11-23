@@ -1,0 +1,32 @@
+---
+source: tests/gallery.rs
+expression: snapshot
+---
+--- width 40
+*[
+  _type == "movie"
+  && count((categories[]->slug.current)[
+    @
+      in [
+        "action",
+        "thriller",
+        "science-fiction"
+      ]
+  ]) > 0
+]
+--- width 60
+*[
+  _type == "movie"
+  && count((categories[]->slug.current)[
+    @ in ["action", "thriller", "science-fiction"]
+  ]) > 0
+]
+--- width 80
+*[
+  _type == "movie"
+  && count((categories[]->slug.current)[
+    @ in ["action", "thriller", "science-fiction"]
+  ]) > 0
+]
+--- width 120
+*[_type == "movie" && count((categories[]->slug.current)[@ in ["action", "thriller", "science-fiction"]]) > 0]

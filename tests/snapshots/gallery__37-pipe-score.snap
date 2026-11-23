@@ -1,0 +1,18 @@
+---
+source: tests/gallery.rs
+expression: snapshot
+---
+--- width 40
+*[_type == $type]
+  | score(text::semanticSimilarity($q))
+  | order(_score desc)[0...10] { title }
+--- width 60
+*[_type == $type]
+  | score(text::semanticSimilarity($q))
+  | order(_score desc)[0...10] { title }
+--- width 80
+*[_type == $type]
+  | score(text::semanticSimilarity($q))
+  | order(_score desc)[0...10] { title }
+--- width 120
+*[_type == $type] | score(text::semanticSimilarity($q)) | order(_score desc)[0...10] { title }

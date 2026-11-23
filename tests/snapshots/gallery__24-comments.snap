@@ -1,0 +1,56 @@
+---
+source: tests/gallery.rs
+expression: snapshot
+---
+--- width 40
+// Featured posts for the homepage
+*[
+  _type == "post" // only posts
+  && featured == true
+  // hide drafts
+  && !(_id in path("drafts.**"))
+] | order(publishedAt desc) {
+  title, // the headline
+  "slug": slug.current,
+  // resolve the author reference
+  "author": author->name
+}
+--- width 60
+// Featured posts for the homepage
+*[
+  _type == "post" // only posts
+  && featured == true
+  // hide drafts
+  && !(_id in path("drafts.**"))
+] | order(publishedAt desc) {
+  title, // the headline
+  "slug": slug.current,
+  // resolve the author reference
+  "author": author->name
+}
+--- width 80
+// Featured posts for the homepage
+*[
+  _type == "post" // only posts
+  && featured == true
+  // hide drafts
+  && !(_id in path("drafts.**"))
+] | order(publishedAt desc) {
+  title, // the headline
+  "slug": slug.current,
+  // resolve the author reference
+  "author": author->name
+}
+--- width 120
+// Featured posts for the homepage
+*[
+  _type == "post" // only posts
+  && featured == true
+  // hide drafts
+  && !(_id in path("drafts.**"))
+] | order(publishedAt desc) {
+  title, // the headline
+  "slug": slug.current,
+  // resolve the author reference
+  "author": author->name
+}
